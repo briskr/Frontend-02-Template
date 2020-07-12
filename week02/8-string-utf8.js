@@ -1,4 +1,19 @@
 /*
+  Non-BMP characters (range U+10000—U+10FFFF) are stored as "surrogate pairs"
+  High Surrogate: 0xd800 ~ 0xdbff
+  Low Surrogate: 0xdc00 ~ 0xdfff
+
+  BMP: 0x0000 ~ 0xFFFF
+  16 个 Non-BMP: 0x01 xxxx ~ 0x10 xxxx 
+  码点 0x01 xxxx -> 0xd8 xx, 0xdc xx
+  编码规则:
+  ```
+    code = (character - 0x10000);
+    units[0] = 0xD800 | (code >> 10);
+    units[1] = 0xDC00 | (code & 0x3FF);
+  ```
+  lower surrogate 中含 10 bit
+
   https://unicodebook.readthedocs.io/unicode_encodings.html
 
   https://www.fileformat.info/info/unicode/utf8.htm
@@ -16,9 +31,47 @@ function intToHex(n) {
 }
 
 /**
+ * Build array of char code numbers
+ * @param {string} s input string
+ * @returns array of number
+ */
+function getCharCodes(s) {
+  const resultBytes = [];
+  for (let i = 0; i < s.length; i++) {
+    resultBytes.push(s.charCodeAt(i));
+  }
+  return resultBytes;
+}
+
+/**
+ * UTF-16 encode
+ * @param {string} s input string
+ * @returns array of number
+ */
+function UTF16_Encoding(s) {
+  const buffer = new ArrayBuffer(s.length * Uint16Array.BYTES_PER_ELEMENT);
+  // TODO 字节序前缀 FF FE
+
+  // write char codes (uint16)
+  const charCodes = new Uint16Array(buffer);
+  for (let i = 0; i < s.length; i++) {
+    charCodes[i] = s.charCodeAt(i);
+  }
+
+  // read buffer as bytes (little-endian)
+  const bytes = new Uint8Array(buffer);
+  const resultBytes = [];
+  for (let i = 0; i < bytes.length; i += 1) {
+    resultBytes.push(bytes[i]);
+  }
+
+  return resultBytes;
+}
+
+/**
  * encode one integer char code to UTF-8 bytes
  * @param {number} ch integer char code
- * @returns result as Uint8Array
+ * @returns {Uint8Array | null} result as Uint8Array
  */
 function buildUtf8BytesForChar(ch) {
   // 各字节长度可支持的代码上限
@@ -121,6 +174,16 @@ function UTF8_Encoding(s) {
 
 const text = "𬜬蔄man4";
 //[0xd871, 0xdf2c, 0x8504, 0x6d, 0x61, 0x6e, 0x34]
+
+console.log("Character codes:");
+const charCodes = getCharCodes(text);
+console.log("[" + charCodes.map(intToHex).join(", ") + "]");
+console.log();
+
+console.log("UTF-16 encoded:");
+const utf16Bytes = UTF16_Encoding(text);
+console.log("[" + utf16Bytes.map(intToHex).join(", ") + "]");
+console.log();
 
 console.log("UTF-8 encoded:");
 const utf8Bytes = UTF8_Encoding(text);
