@@ -7,16 +7,30 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "8-utf8",
+      "name": "w2-8-utf8",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\week02\\8-string-utf8.js"
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "10-bite",
+      "name": "w2-10-bite",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\week02\\10-bite.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "w3-2",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\week03\\02-conversion.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "w3-7-vm",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\week03\\07-vm.js"
     }
   ]
 }
