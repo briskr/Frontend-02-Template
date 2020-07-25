@@ -83,7 +83,26 @@ class Request {
  * 负责接收并解析响应内容，完成后返回字符串
  */
 class ResponseParser {
-  constructor() {}
+  /** FSM states */
+  static FS = {
+    WAITING_STATUS_LINE: 0,
+    WAITING_STATUS_LINE_END: 1,
+    WAITING_HEADER_NAME: 2,
+    WAITING_HEADER_SPACE: 3,
+    WAITING_HEADER_VALUE: 4,
+    WAITING_HEADER_LINE_END: 5,
+    WAITING_HEADER_BLOCK_END: 6,
+    WAITING_BODY: 7,
+  };
+
+  constructor() {
+    this.current = ResponseParser.FS.WAITING_STATUS_LINE;
+    this.statusLine = '';
+    this.headers = Object.create(null);
+    this.headerName = '';
+    this.headerValue = '';
+    this.bodyParser = null;
+  }
 
   /** 接收一次响应内容 */
   receive(string) {
@@ -94,7 +113,42 @@ class ResponseParser {
 
   /** 处理响应内容中的一个字符 */
   receiveChar(char) {
-    //
+    if (this.current === ResponseParser.FS.WAITING_STATUS_LINE) {
+      if (char === '\r')
+        this.current = ResponseParser.FS.WAITING_STATUS_LINE_END;
+      else this.statusLine += char;
+    } else if (this.current === ResponseParser.FS.WAITING_STATUS_LINE_END) {
+      if (char === '\n') {
+        this.current = ResponseParser.FS.WAITING_HEADER_NAME;
+        console.debug('-- Status Line : ' + this.statusLine);
+      }
+    } else if (this.current === ResponseParser.FS.WAITING_HEADER_NAME) {
+      if (char === ':') {
+        this.current = ResponseParser.FS.WAITING_HEADER_SPACE;
+      } else if (char === '\r') {
+        this.current = ResponseParser.FS.WAITING_HEADER_BLOCK_END;
+      } else {
+        this.headerName += char;
+      }
+    } else if (this.current === ResponseParser.FS.WAITING_HEADER_SPACE) {
+      if (char === ' ') this.current = ResponseParser.FS.WAITING_HEADER_VALUE;
+    } else if (this.current === ResponseParser.FS.WAITING_HEADER_VALUE) {
+      if (char === '\r') {
+        this.current = ResponseParser.FS.WAITING_HEADER_LINE_END;
+        this.headers[this.headerName] = this.headerValue;
+        this.headerName = '';
+        this.headerValue = '';
+      } else {
+        this.headerValue += char;
+      }
+    } else if (this.current === ResponseParser.FS.WAITING_HEADER_LINE_END) {
+      if (char === '\n') this.current = ResponseParser.FS.WAITING_HEADER_NAME;
+    } else if (this.current === ResponseParser.FS.WAITING_HEADER_BLOCK_END) {
+      if (char === '\n') this.current = ResponseParser.FS.WAITING_BODY;
+      console.debug('-- Headers finished : ' + JSON.stringify(this.headers));
+    } else if (this.current === ResponseParser.FS.WAITING_BODY) {
+      console.debug(char);
+    }
   }
 
   /** 是否已完成整个结构的解析 */
