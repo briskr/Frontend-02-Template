@@ -38,10 +38,9 @@ class Request {
       ),
       '',
       this.bodyText,
-      '',
     ];
     const result = lines.join('\r\n');
-    console.debug('request.toString() result:');
+    console.debug('-- request.toString() result --');
     console.debug(result);
     return result;
   }
@@ -49,17 +48,33 @@ class Request {
   /**
    * 发送 request 内容，并
    */
-  async send() {
+  async send(connection) {
     return new Promise((resolve, reject) => {
       const parser = new ResponseParser();
 
-      let connection = net.createConnection(this.port, this.host);
+      if (!connection) {
+        connection = net.createConnection(this.port, this.host);
+      }
       connection.write(this.toString());
+      console.debug('-- request sent --');
 
-      // read response from connection
-      connection.end();
+      // read data from connection, send to parser
+      connection.on('data', (data) => {
+        console.debug('-- response chunk --');
+        console.debug(data.toString());
+        parser.receive(data.toString());
 
-      resolve('response');
+        if (parser.isFinished) {
+          resolve(parser.response);
+          connection.end();
+        }
+      });
+
+      connection.on('error', (err) => {
+        console.debug('onError', err);
+        reject(err);
+        connection.end();
+      });
     });
   }
 }
@@ -80,6 +95,16 @@ class ResponseParser {
   /** 处理响应内容中的一个字符 */
   receiveChar(char) {
     //
+  }
+
+  /** 是否已完成整个结构的解析 */
+  get isFinished() {
+    return true;
+  }
+
+  /** 解析完成后的 response 内容 */
+  get response() {
+    return 'response';
   }
 }
 
