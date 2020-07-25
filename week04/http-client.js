@@ -28,23 +28,20 @@ class Request {
     this.headers['Content-Length'] = this.bodyText.length;
   }
 
+  /** 按照 HTTP 协议格式构造请求 */
   toString() {
-    let result = '';
-    const writeLine = (line) => {
-      result += (line ? line : '') + '\r\n';
-    };
-    writeLine(`GET ${this.path} HTTP/1.1`);
-    writeLine(`Host: ${this.host}`);
-    for (const key of Object.getOwnPropertyNames(this.headers)) {
-      const header = key + ': ' + this.headers[key];
-      writeLine(header);
-    }
-    writeLine();
-
-    writeLine(this.bodyText);
-    writeLine();
-
-    console.debug('request built:');
+    let lines = [
+      `${this.method} ${this.path} HTTP/1.1`,
+      `Host: ${this.host}`,
+      ...Object.getOwnPropertyNames(this.headers).map(
+        (key) => `${key}: ${this.headers[key]}`
+      ),
+      '',
+      this.bodyText,
+      '',
+    ];
+    const result = lines.join('\r\n');
+    console.debug('request.toString() result:');
     console.debug(result);
     return result;
   }
@@ -59,7 +56,7 @@ class Request {
       let connection = net.createConnection(this.port, this.host);
       connection.write(this.toString());
 
-      // TODO read response from connection
+      // read response from connection
       connection.end();
 
       resolve('response');
@@ -72,12 +69,18 @@ class Request {
  */
 class ResponseParser {
   constructor() {}
+
+  /** 接收一次响应内容 */
   receive(string) {
     for (let i = 0; i < string.length; i++) {
       this.receiveChar(string.charAt(i));
     }
   }
-  receiveChar(char) {}
+
+  /** 处理响应内容中的一个字符 */
+  receiveChar(char) {
+    //
+  }
 }
 
 /**
