@@ -60,7 +60,7 @@ class Request {
 
       // read data from connection, send to parser
       connection.on('data', (data) => {
-        console.debug('-- response chunk --');
+        console.debug('-- response packet --');
         console.debug(data.toString());
         parser.receive(data.toString());
 
@@ -80,7 +80,7 @@ class Request {
 }
 
 /**
- * 负责接收并解析响应内容，完成后返回字符串
+ * 负责接收并解析响应内容（其中 body 部分交给 BodyParser 完成），完成后返回字符串
  */
 class ResponseParser {
   /** FSM states */
@@ -101,7 +101,6 @@ class ResponseParser {
     this.headers = Object.create(null);
     this.headerName = '';
     this.headerValue = '';
-    this.bodyParser = null;
   }
 
   /** 接收一次响应内容 */
@@ -120,13 +119,18 @@ class ResponseParser {
     } else if (this.current === ResponseParser.FS.WAITING_STATUS_LINE_END) {
       if (char === '\n') {
         this.current = ResponseParser.FS.WAITING_HEADER_NAME;
-        console.debug('-- Status Line : ' + this.statusLine);
+        /* console.debug('-- Status Line --');
+        console.debug(this.statusLine); */
       }
     } else if (this.current === ResponseParser.FS.WAITING_HEADER_NAME) {
       if (char === ':') {
         this.current = ResponseParser.FS.WAITING_HEADER_SPACE;
       } else if (char === '\r') {
         this.current = ResponseParser.FS.WAITING_HEADER_BLOCK_END;
+        // TODO 支持其他格式的 body 解析，创建不同类型的 Parser
+        if (this.headers['Transfer-Encoding'] === 'chunked') {
+          this.bodyParser = new ChunkedBodyParser();
+        }
       } else {
         this.headerName += char;
       }
@@ -145,20 +149,86 @@ class ResponseParser {
       if (char === '\n') this.current = ResponseParser.FS.WAITING_HEADER_NAME;
     } else if (this.current === ResponseParser.FS.WAITING_HEADER_BLOCK_END) {
       if (char === '\n') this.current = ResponseParser.FS.WAITING_BODY;
-      console.debug('-- Headers finished : ' + JSON.stringify(this.headers));
+      /* console.debug('-- Headers finished --');
+      console.debug(JSON.stringify(this.headers)); */
     } else if (this.current === ResponseParser.FS.WAITING_BODY) {
-      console.debug(char);
+      this.bodyParser.receiveChar(char);
     }
   }
 
   /** 是否已完成整个结构的解析 */
   get isFinished() {
-    return true;
+    return this.bodyParser && this.bodyParser.isFinished;
   }
 
   /** 解析完成后的 response 内容 */
   get response() {
-    return 'response';
+    this.statusLine.match(/^HTTP\/1.1 ([0-9]+) ([\s\S]+)$/);
+    if (!this.isFinished) {
+      return null;
+    }
+    return {
+      statusCode: RegExp.$1,
+      statusText: RegExp.$2,
+      headers: this.headers,
+      body: this.bodyParser.result,
+    };
+  }
+}
+
+/** 实现 chunked 格式 body 的解析 */
+class ChunkedBodyParser {
+  /** FSM states */
+  static FS = {
+    WAITING_LENGTH: 0,
+    WAITING_LENGTH_LINE_END: 1,
+    READING_CHUNK: 2,
+    WAITING_NEW_LINE: 3,
+    WAITING_NEW_LINE_END: 4,
+  };
+
+  constructor() {
+    this.length = 0;
+    this.content = [];
+    this.result = '';
+    this.isFinished = false;
+    this.current = ChunkedBodyParser.FS.WAITING_LENGTH;
+  }
+
+  receiveChar(char) {
+    if (this.current === ChunkedBodyParser.FS.WAITING_LENGTH) {
+      if (char === '\r') {
+        if (this.length === 0) {
+          this.isFinished = true;
+        }
+        this.current = ChunkedBodyParser.FS.WAITING_LENGTH_LINE_END;
+      } else {
+        this.length *= 16; // 前值左移一位
+        this.length += parseInt(char, 16); // 加上此次读到的数字
+      }
+    } else if (this.current === ChunkedBodyParser.FS.WAITING_LENGTH_LINE_END) {
+      if (char === '\n') {
+        this.current = ChunkedBodyParser.FS.READING_CHUNK;
+      }
+    } else if (this.current === ChunkedBodyParser.FS.READING_CHUNK) {
+      this.content.push(char);
+      this.length--;
+      if (this.length === 0) {
+        this.current = ChunkedBodyParser.FS.WAITING_NEW_LINE;
+        // 提取 content
+        const chunkText = this.content.join('');
+        this.result += chunkText;
+        this.content = [];
+      }
+    } else if (this.current === ChunkedBodyParser.FS.WAITING_NEW_LINE) {
+      if (char === '\r') {
+        this.current = ChunkedBodyParser.FS.WAITING_NEW_LINE_END;
+      }
+    } else if (this.current === ChunkedBodyParser.FS.WAITING_NEW_LINE_END) {
+      if (char === '\n') {
+        this.current = ChunkedBodyParser.FS.WAITING_LENGTH;
+      }
+    }
   }
 }
 
@@ -180,5 +250,6 @@ void (async function () {
     },
   });
   let response = await request.send();
-  console.log(response);
+  console.log('-- send() resolved, response: --');
+  console.log(JSON.stringify(response));
 })();
