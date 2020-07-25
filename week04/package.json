@@ -1,0 +1,10 @@
+{
+  "name": "demo-http",
+  "description": "HTTP server demo",
+  "authors": "briskr",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "node http-server.js"
+  },
+  "dependencies": {}
+}
