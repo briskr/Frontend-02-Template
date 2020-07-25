@@ -1,4 +1,6 @@
 const net = require('net');
+const parser = require('./html-parser.js');
+
 /**
  * 封装 request 中包含的信息，并定义 send 函数
  */
@@ -60,8 +62,8 @@ class Request {
 
       // read data from connection, send to parser
       connection.on('data', (data) => {
-        console.debug('-- response packet --');
-        console.debug(data.toString());
+        /* console.debug('-- response packet --');
+        console.debug(data.toString()); */
         parser.receive(data.toString());
 
         if (parser.isFinished) {
@@ -249,7 +251,12 @@ void (async function () {
       occupation: 'programmer',
     },
   });
+
   let response = await request.send();
-  console.log('-- send() resolved, response: --');
-  console.log(JSON.stringify(response));
+  //console.log(JSON.stringify(response));
+  console.debug('-- response body --');
+  console.debug(response.body);
+  console.debug('----');
+  let dom = parser.parseHTML(response.body);
+  console.log(dom);
 })();

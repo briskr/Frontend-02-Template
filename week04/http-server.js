@@ -17,7 +17,23 @@ http
         console.log('body:', reqText);
 
         response.writeHead(200, { 'Content-Type': 'text/html' });
-        response.end('Hello, World!\n');
+        response.end(`<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Document</title>
+  <style>
+  body div #myid {
+    width: 199px;
+    background-color: #ff5000;
+  }
+  </style>
+</head>
+<body>
+  <p>Hello, World</p>
+  <img id="myid"/>
+  <img />
+</body>
+</html>`);
       });
   })
   .listen(port);
