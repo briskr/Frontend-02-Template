@@ -28,14 +28,61 @@ class Request {
     this.headers['Content-Length'] = this.bodyText.length;
   }
 
+  toString() {
+    let result = '';
+    const writeLine = (line) => {
+      result += (line ? line : '') + '\r\n';
+    };
+    writeLine(`GET ${this.path} HTTP/1.1`);
+    writeLine(`Host: ${this.host}`);
+    for (const key of Object.getOwnPropertyNames(this.headers)) {
+      const header = key + ': ' + this.headers[key];
+      writeLine(header);
+    }
+    writeLine();
+
+    writeLine(this.bodyText);
+    writeLine();
+
+    console.debug('request built:');
+    console.debug(result);
+    return result;
+  }
+
   /**
    * 发送 request 内容，并
    */
   async send() {
-    // TODO
+    return new Promise((resolve, reject) => {
+      const parser = new ResponseParser();
+
+      let connection = net.createConnection(this.port, this.host);
+      connection.write(this.toString());
+
+      // TODO read response from connection
+      connection.end();
+
+      resolve('response');
+    });
   }
 }
 
+/**
+ * 负责接收并解析响应内容，完成后返回字符串
+ */
+class ResponseParser {
+  constructor() {}
+  receive(string) {
+    for (let i = 0; i < string.length; i++) {
+      this.receiveChar(string.charAt(i));
+    }
+  }
+  receiveChar(char) {}
+}
+
+/**
+ * 执行一次 HTTP 请求并解析响应内容
+ */
 void (async function () {
   const request = new Request({
     method: 'POST',

@@ -3,18 +3,19 @@ const http = require('http');
 const port = 8088;
 http
   .createServer((request, response) => {
-    let body = [];
+    let reqData = [];
     request
       .on('error', (err) => {
         console.error(err);
       })
       .on('data', (chunk) => {
         //console.debug('chunk', chunk.toString());
-        body.push(chunk);
+        reqData.push(chunk);
       })
       .on('end', () => {
-        body = Buffer.concat(body).toString();
-        console.log('body:', body);
+        const reqText = Buffer.concat(reqData).toString();
+        console.log('body:', reqText);
+
         response.writeHead(200, { 'Content-Type': 'text/html' });
         response.end('Hello, World!\n');
       });
