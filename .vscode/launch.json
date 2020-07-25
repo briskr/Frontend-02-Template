@@ -31,6 +31,32 @@
       "name": "w3-7-vm",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\week03\\07-vm.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "w4-find",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\week04\\05-find.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "w4-fsm",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\week04\\07-fsm2.js"
+    },
+    {
+      "type": "node",
+      "name": "demo server",
+      "request": "launch",
+      "program": "${workspaceFolder}\\week04\\09-server.js"
+    },
+    {
+      "type": "node",
+      "name": "demo client",
+      "request": "launch",
+      "program": "${workspaceFolder}\\week04\\10-http-req.js"
     }
   ]
 }
