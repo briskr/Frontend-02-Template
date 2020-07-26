@@ -17,20 +17,20 @@ http
         console.log('body:', reqText);
 
         response.writeHead(200, { 'Content-Type': 'text/html' });
-        response.end(`<html lang="en">
+        response.end(`<html lang='en'>
 <head>
   <meta charset="UTF-8"/>
   <title>Document</title>
   <style>
   body div #myid {
-    width: 199px;
+    width: 100px;
     background-color: #ff5000;
   }
   </style>
 </head>
-<body>
+<body class='dark'>
   <p>Hello, World</p>
-  <img id="myid"/>
+  <img id=myid/>
   <img />
 </body>
 </html>`);
