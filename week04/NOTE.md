@@ -1,5 +1,40 @@
 学习笔记
 
+# 学习总结
+
+- 浏览器从输入 URL 到展示页面过程中的各主要阶段
+
+- 引入有限状态机的概念 - Moore, Mealy
+
+- 不使用 FSM 的情况下，实现子串查找
+
+  - 多字符的查找内容，需要记录连续匹配状态，匹配序列中断后需要重置匹配状态
+  - 简单查找算法时间复杂度 O(m(n-m+1))
+  - KMP 算法时间复杂度 O(n) - **TODO 这个选作作业没做**
+
+- FSM 可采用一组 JS 函数表示一组状态，函数内可以根据输入进行分支，选择下一步进入哪个状态，（并可以通过副作用记录更多信息）
+
+- TCP / IP 协议基础知识，及 HTTP 协议的 请求 / 响应 交互流程
+
+- 在 NodeJs 的 http 包之上实现一个简单的 HTTP Server
+
+- 在 NodeJs 的 tcp 包之上实现 HTTP 请求发送和响应接收
+
+  - HTTP 请求的格式 - 文本型 - request line, headers, body
+  - 发送请求内容，随后接收响应内容 - 响应的格式 - status line, headers, body
+  - 采用状态枚举实现 FSM，实现对请求体头部信息的解析
+  - Transfer-Encoding: chunked 的编码结构
+  - 采用另一个 FSM 用于解析 chunked 格式的 body 内容
+
+- 解析从响应中获得的 HTML 内容，转化成 DOM 树结构
+
+  - 实现 HTML 标准中定义的状态机，完成词法分析，形成 token 序列
+  - 用栈记录尚未收到 end tag 的 element，加入 child element 和 text node
+
+- 参考资料
+  - [KMP 算法](https://www.geeksforgeeks.org/kmp-algorithm-for-pattern-searching/)
+  - [HTML 语法](https://html.spec.whatwg.org/multipage/syntax.html)
+
 # 随堂笔记
 
 ## 浏览器工作原理
@@ -98,18 +133,17 @@
 - parseHTML 函数负责把 HTML 内容解析成 DOM 树
 - HTML spec (WHATWG) 定义了状态机
   - 课程中的实现有所简化
-- 分步进行
-  - 解析 标签 Tag
-    - 类型分为 startTag `<html>` (含 self-closing `<br/>` ), endTag `</div>`
-  - 在状态机中加入 emit 动作，输出 token 内容
-    - 标签语法处理结束前暂存，完成后 emit
-  - 处理属性
-    - 单、双引号和无引号三种格式，状态转换路径不同
-    - 属性声明语法结束前暂存，完成后把信息保存到上一步暂存的 token 上
-  - 利用 栈 数据结构，根据 token 构建 DOM 树
-    - 遇到 startTag (非自封闭) token 时创建元素，加入栈顶元素的 children ，将新元素入栈；遇到 endTag token 时出栈
-    - 自封闭 tag token 视为入栈后立即出栈；有效动作只是将自己加入栈顶元素的 children
-    - 当前栈顶元素是新建元素的父元素
-  - 提取元素内的文本节点
-    - 文本节点为空的情况下，收到新的文本 token，则新建暂存文本节点，加入到当前栈顶元素的 children
-    - 每次 startTag, endTag 处理完之后清空暂存的文本节点 (后续的文本 token 将被加入后续新建的元素，或本次完成元素的父元素)
+- 解析 标签 Tag
+  - 类型分为 startTag `<html>` (含 self-closing `<br/>` ), endTag `</div>`
+- 在状态机中加入 emit 动作，输出 token 内容
+  - 标签语法处理结束前暂存，完成后 emit
+- 处理属性
+  - 单、双引号和无引号三种格式，状态转换路径不同
+  - 属性声明语法结束前暂存，完成后把信息保存到上一步暂存的 token 上
+- 利用 栈 数据结构，根据 token 构建 DOM 树
+  - 遇到 startTag (非自封闭) token 时创建元素，加入栈顶元素的 children ，将新元素入栈；遇到 endTag token 时出栈
+  - 自封闭 tag token 视为入栈后立即出栈；有效动作只是将自己加入栈顶元素的 children
+  - 当前栈顶元素是新建元素的父元素
+- 提取元素内的文本节点
+  - 文本节点为空的情况下，收到新的文本 token，则新建暂存文本节点，加入到当前栈顶元素的 children
+  - 每次 startTag, endTag 处理完之后清空暂存的文本节点 (后续的文本 token 将被加入后续新建的元素，或本次完成元素的父元素)
