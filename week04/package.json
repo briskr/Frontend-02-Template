@@ -4,7 +4,8 @@
   "authors": "briskr",
   "version": "1.0.0",
   "scripts": {
-    "server": "node http-server.js"
+    "server": "node http-server.js",
+    "client": "node http-client.js"
   },
   "dependencies": {}
 }
