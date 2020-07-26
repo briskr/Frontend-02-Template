@@ -2,12 +2,62 @@ const EOF = Symbol('EOF');
 const REGEXP_LETTERS = /^[a-zA-Z]$/;
 const REGEXP_WHITE_SPACE = /^[ \t\n\f]$/;
 
+// 词法分析阶段
 let currentToken = null;
 let currentAttribute = null;
+
+// DOM 树构造阶段
+let stack = [
+  {
+    type: 'document',
+    children: [],
+  },
+];
 
 function emit(token) {
   if (!token) debugger;
   console.debug('emit:', token);
+
+  if (token.type === 'text') {
+    return;
+  }
+
+  let top = stack[stack.length - 1];
+  if (token.type === 'startTag') {
+    let element = {
+      type: 'element',
+      children: [],
+      attributes: [],
+    };
+    element.tagName = token.tagName;
+
+    for (let attrName of Object.getOwnPropertyNames(token)) {
+      if (
+        attrName === 'type' ||
+        attrName === 'tagName' ||
+        attrName === 'isSelfClosing'
+      )
+        continue;
+
+      element.attributes.push({
+        name: attrName,
+        value: token[attrName],
+      });
+    }
+
+    top.children.push(element);
+    //element.parent = top;
+
+    if (!token.isSelfClosing) {
+      stack.push(element);
+    }
+  } else if (token.type === 'endTag') {
+    if (top.tagName !== token.tagName) {
+      throw Error('End tag do not match the Open tag');
+    } else {
+      stack.pop();
+    }
+  }
 }
 
 function data(c) {
@@ -208,4 +258,7 @@ module.exports.parseHTML = function parseHTML(html) {
     state = state(c);
   }
   state = state(EOF);
+
+  console.log('-- result --');
+  console.log(JSON.stringify(stack[0]));
 };
