@@ -1,0 +1,141 @@
+{
+  "type": "document",
+  "children": [
+    {
+      "type": "element",
+      "children": [
+        {
+          "type": "text",
+          "content": "\n"
+        },
+        {
+          "type": "element",
+          "children": [
+            {
+              "type": "text",
+              "content": "\n  "
+            },
+            {
+              "type": "element",
+              "children": [],
+              "attributes": [
+                {
+                  "name": "charset",
+                  "value": "UTF-8"
+                }
+              ],
+              "tagName": "meta"
+            },
+            {
+              "type": "text",
+              "content": "\n  "
+            },
+            {
+              "type": "element",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "Document"
+                }
+              ],
+              "attributes": [],
+              "tagName": "title"
+            },
+            {
+              "type": "text",
+              "content": "\n  "
+            },
+            {
+              "type": "element",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "\n  body div #myid {\n    width: 100px;\n    background-color: #ff5000;\n  }\n  "
+                }
+              ],
+              "attributes": [],
+              "tagName": "style"
+            },
+            {
+              "type": "text",
+              "content": "\n"
+            }
+          ],
+          "attributes": [],
+          "tagName": "head"
+        },
+        {
+          "type": "text",
+          "content": "\n"
+        },
+        {
+          "type": "element",
+          "children": [
+            {
+              "type": "text",
+              "content": "\n  "
+            },
+            {
+              "type": "element",
+              "children": [
+                {
+                  "type": "text",
+                  "content": "Hello, World"
+                }
+              ],
+              "attributes": [],
+              "tagName": "p"
+            },
+            {
+              "type": "text",
+              "content": "\n  "
+            },
+            {
+              "type": "element",
+              "children": [],
+              "attributes": [
+                {
+                  "name": "id",
+                  "value": "myid"
+                }
+              ],
+              "tagName": "img"
+            },
+            {
+              "type": "text",
+              "content": "\n  "
+            },
+            {
+              "type": "element",
+              "children": [],
+              "attributes": [],
+              "tagName": "img"
+            },
+            {
+              "type": "text",
+              "content": "\n"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "class",
+              "value": "dark"
+            }
+          ],
+          "tagName": "body"
+        },
+        {
+          "type": "text",
+          "content": "\n"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "lang",
+          "value": "en"
+        }
+      ],
+      "tagName": "html"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ let currentToken = null;
 let currentAttribute = null;
 
 // DOM 树构造阶段
+let currentTextNode = null;
 let stack = [
   {
     type: 'document',
@@ -17,10 +18,6 @@ let stack = [
 function emit(token) {
   if (!token) debugger;
   console.debug('emit:', token);
-
-  if (token.type === 'text') {
-    return;
-  }
 
   let top = stack[stack.length - 1];
   if (token.type === 'startTag') {
@@ -51,12 +48,25 @@ function emit(token) {
     if (!token.isSelfClosing) {
       stack.push(element);
     }
+
+    currentTextNode = null;
   } else if (token.type === 'endTag') {
     if (top.tagName !== token.tagName) {
       throw Error('End tag do not match the Open tag');
     } else {
       stack.pop();
     }
+
+    currentTextNode = null;
+  } else if (token.type === 'text') {
+    if (currentTextNode === null) {
+      currentTextNode = {
+        type: 'text',
+        content: '',
+      };
+      top.children.push(currentTextNode);
+    }
+    currentTextNode.content += token.content;
   }
 }
 
