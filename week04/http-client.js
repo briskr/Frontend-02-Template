@@ -48,7 +48,7 @@ class Request {
   }
 
   /**
-   * 发送 request 内容，并
+   * 发送 request 内容，并接收响应
    */
   async send(connection) {
     return new Promise((resolve, reject) => {
