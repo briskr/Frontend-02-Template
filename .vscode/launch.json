@@ -50,13 +50,13 @@
       "type": "node",
       "name": "demo server",
       "request": "launch",
-      "program": "${workspaceFolder}\\week04\\http-server.js"
+      "program": "${workspaceFolder}\\week05\\http-server.js"
     },
     {
       "type": "node",
       "name": "demo client",
       "request": "launch",
-      "program": "${workspaceFolder}\\week04\\http-client.js"
+      "program": "${workspaceFolder}\\week05\\http-client.js"
     }
   ]
 }

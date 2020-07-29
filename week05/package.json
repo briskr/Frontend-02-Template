@@ -1,0 +1,14 @@
+{
+  "name": "toy-browswer",
+  "description": "HTTP client and HTML + CSS parser demo",
+  "authors": "briskr",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "server": "node http-server.js",
+    "client": "node http-client.js"
+  },
+  "dependencies": {
+    "css": "^3.0.0"
+  }
+}
