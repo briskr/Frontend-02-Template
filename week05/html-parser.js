@@ -20,20 +20,71 @@ let stack = [
 let rules = [];
 /** 解析<style>标签内的文本(在 head 内定义) */
 function addCSSRules(content) {
-  var ast = css.parse(content);
+  const ast = css.parse(content);
   rules.push(...ast.stylesheet.rules);
+}
+
+/**
+ * 判断 element 是否匹配 selector
+ * 支持 elem .class #id 等形式之一，暂不支持复合选择器
+ */
+function match(element, selector) {
+  if (!selector || !element.attributes) {
+    return false;
+  }
+  // TODO 复合选择器，拆分 selector 结构，满足 selector 要求的所有条件才算匹配
+
+  // TODO 元素的 class 属性有空格分隔的多个值，其中之一与 selector 匹配即可
+
+  if (selector.charAt(0) === '#') {
+    let attr = element.attributes.filter((attr) => attr.name === 'id')[0];
+    if (attr && attr.value === selector.substring(1)) {
+      return true;
+    }
+  } else if (selector.charAt(0) === '.') {
+    let attr = element.attributes.filter((attr) => attr.name === 'class')[0];
+    if (attr && attr.value === selector.substring(1)) {
+      return true;
+    }
+  } else {
+    if (element.tagName === selector) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /** 根据已有的 CSS 规则集，计算当前元素的 style 内容 */
 function computeCSS(element) {
-  //console.debug(rules);
-  console.debug(`-- computing CSS for element ${element.tagName} --`);
-  //console.debug(element);
+  const parentElements = stack.slice().reverse();
+
+  if (!element.computedStyle) {
+    element.computedStyle = {};
+  }
+
+  for (const rule of rules) {
+    var selectorParts = rule.selectors[0].split(' ').reverse();
+    if (!match(element, selectorParts[0])) continue;
+
+    let matched = false;
+    let j = 1;
+    for (let i = 0; i < parentElements.length; i++) {
+      if (match(parentElements[i], selectorParts[j])) {
+        j++;
+      }
+    }
+    if (j >= selectorParts.length) {
+      matched = true;
+    }
+    if (matched) {
+      console.debug('Element:', element, 'matched rule:', rule);
+    }
+  }
 }
 
 function emit(token) {
   if (!token) debugger;
-  //console.debug('emit:', token);
+  // console.debug('emit:', token);
 
   let top = stack[stack.length - 1];
   if (token.type === 'startTag') {
@@ -65,6 +116,9 @@ function emit(token) {
 
     if (!token.isSelfClosing) {
       stack.push(element);
+      // console.debug('started element:', element);
+    } else {
+      // console.debug('self-closed element:', element);
     }
 
     currentTextNode = null;
@@ -72,11 +126,13 @@ function emit(token) {
     if (top.tagName !== token.tagName) {
       throw Error('End tag do not match the Open tag');
     } else {
+      // 收集 CSS 样式规则定义
       if (top.tagName === 'style') {
         //console.debug(top.children[0].content);
         addCSSRules(top.children[0].content);
       }
-      stack.pop();
+      const elem = stack.pop();
+      // console.debug('ended element:', elem);
     }
 
     currentTextNode = null;

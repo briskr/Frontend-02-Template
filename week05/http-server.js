@@ -26,16 +26,18 @@ http
     width: 100px;
     background-color: #ff5000;
   }
-  body div img {
+  body .article img {
     width: 30px;
     background-color: #ff1111;
   }
   </style>
 </head>
 <body class='dark'>
-  <p>Hello, World</p>
-  <img id=myid/>
-  <img />
+  <div class="article">
+    <p>Hello, World</p>
+    <img id=myid/>
+    <img />
+  </div>
 </body>
 </html>`);
       });
