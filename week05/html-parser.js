@@ -21,6 +21,7 @@ let rules = [];
 /** 解析<style>标签内的文本(在 head 内定义) */
 function addCSSRules(content) {
   const ast = css.parse(content);
+  //console.debug('parsed rules:', ast.stylesheet.rules);
   rules.push(...ast.stylesheet.rules);
 }
 
@@ -77,7 +78,14 @@ function computeCSS(element) {
       matched = true;
     }
     if (matched) {
-      console.debug('Element:', element, 'matched rule:', rule);
+      const computedStyle = element.computedStyle;
+      for (const declaration of rule.declarations) {
+        if (!computedStyle[declaration.property]) {
+          computedStyle[declaration.property] = {};
+        }
+        computedStyle[declaration.property].value = declaration.value;
+      }
+      console.debug(element, element.computedStyle);
     }
   }
 }
