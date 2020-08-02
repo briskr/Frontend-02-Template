@@ -4,9 +4,16 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Server",
+      "name": "Launch File",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "http-client",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "http-client.js"
     }
   ]
 }

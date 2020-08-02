@@ -1,4 +1,5 @@
 const css = require('css');
+const layout = require('./css-layout');
 
 const EOF = Symbol('EOF');
 const REGEXP_LETTERS = /^[a-zA-Z]$/;
@@ -55,6 +56,38 @@ function match(element, selector) {
   return false;
 }
 
+/** 计算 specificity */
+function specificity(selector) {
+  const p = [0, 0, 0, 0];
+  const selectorParts = selector.split(' ');
+  // TODO 支持各 part 为复合结构: tag#id.class
+
+  for (const part of selectorParts) {
+    if (part.charAt(0) === '#') {
+      p[1]++;
+    } else if (part.charAt(0) === '.') {
+      p[2]++;
+    } else {
+      p[3]++;
+    }
+  }
+  return p;
+}
+
+/** 比较两个 specificity 的大小 */
+function compareSpecificity(sp1, sp2) {
+  if (sp1[0] - sp2[0] !== 0) {
+    return sp1[0] - sp2[0];
+  }
+  if (sp1[1] - sp2[1] !== 0) {
+    return sp1[1] - sp2[1];
+  }
+  if (sp1[2] - sp2[2] !== 0) {
+    return sp1[2] - sp2[2];
+  }
+  return sp1[3] - sp2[3];
+}
+
 /** 根据已有的 CSS 规则集，计算当前元素的 style 内容 */
 function computeCSS(element) {
   const parentElements = stack.slice().reverse();
@@ -78,14 +111,27 @@ function computeCSS(element) {
       matched = true;
     }
     if (matched) {
+      const sp = specificity(rule.selectors[0]);
       const computedStyle = element.computedStyle;
       for (const declaration of rule.declarations) {
         if (!computedStyle[declaration.property]) {
           computedStyle[declaration.property] = {};
         }
-        computedStyle[declaration.property].value = declaration.value;
+
+        if (!computedStyle[declaration.property].specificity) {
+          computedStyle[declaration.property].value = declaration.value;
+          computedStyle[declaration.property].specificity = sp;
+        } else if (
+          compareSpecificity(
+            computedStyle[declaration.property].specificity,
+            sp
+          ) < 0
+        ) {
+          computedStyle[declaration.property].value = declaration.value;
+          computedStyle[declaration.property].specificity = sp;
+        }
       }
-      console.debug(element, element.computedStyle);
+      //console.debug(element, element.computedStyle);
     }
   }
 }
@@ -117,9 +163,11 @@ function emit(token) {
       });
     }
 
+    // 在完成 startTag 后已能够确定元素的所有父元素，因此可以计算适用哪些 CSS 规则
     computeCSS(element);
 
     top.children.push(element);
+    // FIXME 暂时跳过这一步，消除循环引用，便于打印 JSON
     //element.parent = top;
 
     if (!token.isSelfClosing) {
@@ -134,13 +182,17 @@ function emit(token) {
     if (top.tagName !== token.tagName) {
       throw Error('End tag do not match the Open tag');
     } else {
-      // 收集 CSS 样式规则定义
+      // 如果当前关闭的标签是 <style> ，收集其中的 CSS 样式规则
       if (top.tagName === 'style') {
         //console.debug(top.children[0].content);
         addCSSRules(top.children[0].content);
       }
-      const elem = stack.pop();
-      // console.debug('ended element:', elem);
+
+      // 当前关闭标签的子元素已收集完成，因此可进行 CSS 排版计算
+      layout(top);
+
+      // console.debug('completed element:', top);
+      stack.pop();
     }
 
     currentTextNode = null;
@@ -355,6 +407,7 @@ module.exports.parseHTML = function parseHTML(html) {
   }
   state = state(EOF);
 
-  //console.log('-- result --');
-  //console.log(JSON.stringify(stack[0], null, '  '));
+  console.log('-- result --');
+  console.log(JSON.stringify(stack[0], null, '  '));
+  return stack[0];
 };
