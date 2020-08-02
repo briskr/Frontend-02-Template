@@ -1,4 +1,5 @@
 const net = require('net');
+const images = require('images');
 const parser = require('./html-parser.js');
 
 /**
@@ -234,6 +235,30 @@ class ChunkedBodyParser {
   }
 }
 
+/** 在 viewport 上绘制 element  */
+function render(viewport, element) {
+  const rgbRegExp = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/;
+
+  if (element.style) {
+    const img = images(element.style.width, element.style.height);
+    if (element.style['background-color']) {
+      const color = element.style['background-color'] || 'rgb(0,0,0)';
+      const result = color.match(rgbRegExp);
+      if (result.length > 0) {
+        let [r, g, b] = result.slice(1);
+        img.fill(Number(r), Number(g), Number(b));
+        viewport.draw(img, element.style.left || 0, element.style.top || 0);
+      }
+    }
+  }
+
+  if (element.children) {
+    for (const child of element.children) {
+      render(viewport, child);
+    }
+  }
+}
+
 /**
  * 执行一次 HTTP 请求并解析响应内容
  */
@@ -253,10 +278,15 @@ void (async function () {
   });
 
   let response = await request.send();
-  //console.log(JSON.stringify(response));
-  /* console.debug('-- response body --');
-  console.debug(response.body);
-  console.debug('----'); */
+
   let dom = parser.parseHTML(response.body);
-  //console.log(dom);
+
+  const body = dom.children[0].children[3];
+  const container = body.children[1];
+  const myid = container.children[1];
+  const c1 = container.children[3];
+
+  let viewport = images(800, 600);
+  render(viewport, dom);
+  viewport.save('viewport.jpg');
 })();

@@ -371,7 +371,7 @@ function layout(element) {
         itemStyle[crossEnd] =
           itemStyle[crossStart] + crossSign * itemStyle[crossSize];
         // itemStyle[crossEnd] = itemStyle[crossStart] + crossSign * ( (itemStyle[crossSize] !== null && itemStyle[crossSign]) );
-      }
+      } // TODO 未实现 baseline
     } // for each item in flexLine
 
     // finish current flexLine

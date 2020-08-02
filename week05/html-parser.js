@@ -407,7 +407,7 @@ module.exports.parseHTML = function parseHTML(html) {
   }
   state = state(EOF);
 
-  console.log('-- result --');
-  console.log(JSON.stringify(stack[0], null, '  '));
+  /* console.log('-- result --');
+  console.log(JSON.stringify(stack[0], null, '  ')); */
   return stack[0];
 };
