@@ -22,21 +22,23 @@ http
   <meta charset="UTF-8"/>
   <title>Document</title>
   <style>
-  body div #myid {
-    width: 100px;
-    background-color: #ff5000;
-  }
-  body .article img {
-    width: 30px;
-    background-color: #ff1111;
-  }
+#container {
+  width: 500px;
+  height: 300px;
+  display: flex;
+}
+#container #myid {
+  width: 200px;
+}
+#container .c1 {
+  flex: 1;
+}
   </style>
 </head>
-<body class='dark'>
-  <div class="article">
-    <p>Hello, World</p>
-    <img id=myid/>
-    <img />
+<body>
+  <div id="container">
+    <div id="myid"/>
+    <div class="c1" />
   </div>
 </body>
 </html>`);
