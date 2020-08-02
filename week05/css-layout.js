@@ -150,7 +150,7 @@ function layout(element) {
 
   for (const item of items) {
     const itemStyle = item.style;
-    if (itemStyle[mainSize] === null) {
+    if (itemStyle[mainSize] === null || itemStyle[mainSize] === undefined) {
       itemStyle[mainSize] = 0;
     }
 
