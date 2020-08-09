@@ -5,14 +5,6 @@
 
   BMP: 0x0000 ~ 0xFFFF
   16 个 Non-BMP: 0x01 xxxx ~ 0x10 xxxx 
-  码点 0x01 xxxx -> 0xd8 xx, 0xdc xx
-  编码规则:
-  ```
-    code = (character - 0x10000);
-    units[0] = 0xD800 | (code >> 10);
-    units[1] = 0xDC00 | (code & 0x3FF);
-  ```
-  lower surrogate 中含 10 bit
 
   https://unicodebook.readthedocs.io/unicode_encodings.html
 
@@ -74,7 +66,7 @@ function UTF16_Encoding(s) {
  * @returns {Uint8Array | null} result as Uint8Array
  */
 function buildUtf8BytesForChar(ch) {
-  // 各字节长度可支持的代码上限
+  // 各字节长度可支持的字符码上限
   const MAX_CODE_FOR_1B = 0x7f;
   const MAX_CODE_FOR_2B = 0x7ff;
   const MAX_CODE_FOR_3B = 0xffff;
@@ -138,6 +130,7 @@ function buildUtf8BytesForChar(ch) {
 }
 
 /**
+ * http://www.unicode.org/versions/Unicode13.0.0/ch03.pdf#G2630 3.8 Surrogates
  * High Surrogate: \ud800 ~ \udbff
  * Low Surrogate: \udc00 ~ \udfff
  * @param {number} ch integer char code
@@ -148,6 +141,25 @@ function isHighSurrogate(ch) {
 function isLowSurrogate(ch) {
   return ch >= 0xdc00 && ch <= 0xdfff;
 }
+/**
+ * 16 个 Non-BMP: 0x01 xxxx ~ 0x10 xxxx
+ * 字符值 0x(01~10) xxxx -> surrogate pair: 0xd8 yy, 0xdc zz
+  编码规则:
+  ```
+    code = (character - 0x10000); // 0b zzzz yyyy yyyy xxxx xxxx
+    units[0] = 0xD800 | (code >> 10);
+    units[1] = 0xDC00 | (code & 0x3FF);
+    // 0xD800 ==> 0b1101 10zz zzyy yyyy
+    // 0xDC00 ==> 0b1101 11yy xxxx xxxx
+  ```
+  lower surrogate 中含 10 bit
+  解码规则：
+    (zzzz + 1) << 16 | yyyy yyyy << 8 | xxxx xxxx
+
+ * @param {number} high code unit
+ * @param {number} low  code unit
+ */
+function decodeSurrogates(high, low) {}
 
 /**
  * 写一段 JS 的函数，把一个 string 它代表的字节给它转换出来，用 UTF8 对 string 进行编码。
@@ -156,13 +168,16 @@ function isLowSurrogate(ch) {
  */
 function UTF8_Encoding(s) {
   const resultBytes = [];
+  let surr_high = null;
 
   for (let i = 0; i < s.length; i++) {
     const ch = s.charCodeAt(i);
     // 存在扩展字符时， string.length 不等于字符数
-    // TODO 解析 surrogate pair 的码点值
-    if (isHighSurrogate(ch) || isLowSurrogate(ch)) {
+    // TODO 解析 surrogate pair 码点值
+    if (isHighSurrogate(ch)) {
+      surr_high = ch;
       continue;
+    } else if (isLowSurrogate(ch) && surr_high !== null) {
     }
 
     const charBytes = buildUtf8BytesForChar(ch);
@@ -172,8 +187,11 @@ function UTF8_Encoding(s) {
   return resultBytes;
 }
 
-const text = "𬜬蔄man4";
+let text = "𬜬蔄man4";
 //[0xd871, 0xdf2c, 0x8504, 0x6d, 0x61, 0x6e, 0x34]
+// const text2 = "" + "!" + "~" + "ߺ" + "ࠀ" + "￼" + "𐀀" + "🪐" + "😀";
+// text = text2;
+// code points: 1, 21, 7e, 7fa, 800, fffc, 1000, 1fa90,  1f660
 
 console.log("Character codes:");
 const charCodes = getCharCodes(text);

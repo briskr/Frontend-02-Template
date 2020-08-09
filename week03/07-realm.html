@@ -117,6 +117,9 @@
 
         if (target.prototype) {
           nodeInfo.constructorName = target.prototype.constructor.name;
+
+          const protoName = nodeInfo.constructorName + '.prototype';
+          buildNode(protoName, target.prototype);
         }
 
         if (Object.getPrototypeOf(target)) {
