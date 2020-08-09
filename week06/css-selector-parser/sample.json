@@ -1,0 +1,58 @@
+{
+  "source": "a[href^=/], .container:has(nav) > a[href]:lt($var)",
+  "type": "selectors",
+  "selectors": [
+    {
+      "type": "ruleSet",
+      "rule": {
+        "tagName": "a",
+        "attrs": [
+          {
+            "name": "href",
+            "operator": "^=",
+            "valueType": "string",
+            "value": "/"
+          }
+        ],
+        "type": "rule"
+      }
+    },
+    {
+      "type": "ruleSet",
+      "rule": {
+        "classNames": ["container"],
+        "pseudos": [
+          {
+            "name": "has",
+            "valueType": "selector",
+            "value": {
+              "type": "ruleSet",
+              "rule": {
+                "tagName": "nav",
+                "type": "rule"
+              }
+            }
+          }
+        ],
+        "type": "rule",
+        "rule": {
+          "tagName": "a",
+          "attrs": [
+            {
+              "name": "href"
+            }
+          ],
+          "pseudos": [
+            {
+              "name": "lt",
+              "valueType": "substitute",
+              "value": "var"
+            }
+          ],
+          "nestingOperator": ">",
+          "type": "rule"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,248 @@
+<html>
+  <head>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      body,
+      input,
+      button,
+      select,
+      textarea {
+        font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Noto Sans';
+        font-size: 14px;
+      }
+
+      body {
+        width: 600px;
+      }
+
+      .cases {
+        display: flex;
+      }
+
+      .case {
+        width: 80px;
+        height: 60px;
+        margin: 10px;
+        border: 1px solid darkorange;
+      }
+
+      .first {
+        width: 60px;
+        height: 40px;
+        background-color: antiquewhite;
+        border: 1px solid darkgoldenrod;
+      }
+
+      .form {
+        display: flex;
+        flex-flow: column nowrap;
+        width: 360px;
+      }
+      .form-item {
+        min-height: 30px;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .form-item input {
+        width: 240px;
+      }
+      .form-item.left-align {
+        justify-content: flex-start;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      编写一个 match 函数。它接受两个参数，第一个参数是一个选择器字符串性质，第二个是一个 HTML 元素。
+      这个元素你可以认为它一定会在一棵 DOM 树里面。通过选择器和 DOM 元素来判断，当前的元素是否能够匹配到我们的选择器。
+      （不能使用任何内置的浏览器的函数，仅通过 DOM 的 parent 和 children 这些 API，
+      来判断一个元素是否能够跟一个选择器相匹配。）
+    </p>
+
+    <div class="cases">
+      <div class="case">
+        div
+        <div id="id1" class="first">
+          #id1.first
+        </div>
+      </div>
+      <div class="case first" id="id2">
+        #id2.first
+      </div>
+    </div>
+
+    <div id="app" class="form">
+      <div class="form-item">
+        <label for="sel-input">Selector Text</label>
+        <input id="sel-input" type="text" v-model="selector" />
+      </div>
+      <div class="form-item">
+        <label for="id-input">Element ID</label>
+        <input id="id-input" type="text" v-model="elementId" />
+      </div>
+      <div class="form-item left-align">
+        <button @click="test(selector, elementId)">match('{{selector}}', '{{elementId}}')</button> -->
+        <div class="result">{{result}}</div>
+      </div>
+      <pre id="selector-info"></pre>
+    </div>
+
+    <!-- CSS selector 内容的解析，引用 npm 包 css-selector-parser 的代码实现 -->
+    <script src="css-selector-parser/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+    <script>
+      var app = new Vue({
+        el: '#app',
+        data: {
+          selector: 'div #id1.first',
+          elementId: 'id1',
+          result: null,
+          parsedSelector: '',
+        },
+        methods: {
+          test(sel, elemId) {
+            const elem = document.getElementById(elemId);
+            this.result = match(sel, elem);
+          },
+        },
+      });
+
+      /**
+       * 判断 element 对象是否匹配 selector 的定义
+       * @param {string} selectorText - 来自界面上 Selector 输入框的文字
+       * @param {Object} element - 待匹配的 DOM 元素
+       */
+      function match(selectorText, element) {
+        const parser = new CssSelectorParser();
+        parser.registerNestingOperators('>', '+', '~');
+        const result = parser.parse(selectorText);
+
+        /*  */
+        document.getElementById('selector-info').innerHTML = JSON.stringify(result, null, ' ');
+
+        if (result.type === 'selectors') {
+          // 输入内容是 `,` 分隔的多项 selector, 其中一条匹配成功就返回
+          for (const selector of result.selectors) {
+            if (matchRuleSet(selector, element)) {
+              return true;
+            }
+          }
+        } else if (result.type === 'ruleSet') {
+          // 输入内容是单项 selector
+          return matchRuleSet(result, element);
+        }
+        return false;
+      }
+
+      /**
+       * 判断 element 是否匹配 ruleSet 对象描述的选择器
+       */
+      function matchRuleSet(ruleSet, element) {
+        const rules = [];
+        let currentRule = ruleSet;
+        while (currentRule.rule) {
+          rules.push(currentRule.rule);
+          currentRule = rules[rules.length - 1];
+        }
+        rules.reverse();
+
+        // stack 上的 rule 对象依次全部匹配成功，才算完成匹配
+        let index = 0; // 指向一条rule，每匹配成功一条则加一，指向下一条
+        return matchRule(rules, index, element);
+      }
+
+      /**
+       * 递归处理 nestingOperator 连接的 rules 层级
+       * @param {array} rules - 已按从末端到顶端顺序排列的 rules 数组
+       * @param {number} index - rules 数组中当前执行匹配的元素下标
+       * @param {Element} element - 要与当前 rule 进行匹配判定的 DOM 元素
+       * @returns
+       */
+      function matchRule(rules, index, element) {
+        const rule = rules[index];
+        // 判断 rule 对象的这些字段值与本元素全部匹配： tagName, id, classNames, attrs, pseudos
+        // 且 rule.nestingOperator 指定的相关元素也匹配
+        let isMatch = true;
+        isMatch = isMatch && (!rule.tagName || rule.tagName === '*' || rule.tagName === element.tagName);
+        isMatch = isMatch && (!rule.id || rule.id === element.id);
+        isMatch = isMatch && (!rule.classNames || matchClasses(rule.classNames, element.className.split(' ')));
+        isMatch = isMatch && (!rule.attrs || matchAttrs(rule.attrs, element));
+        isMatch = isMatch && (!rule.pseudos || matchPseudos(rule.pseudos, element));
+        if (!isMatch) return false;
+
+        // 本元素判定完成，开始判定 combinator 指定的关联元素
+
+        if (rule.nestingOperator === null) {
+          // 非直接父子关系，用 rules 数组 index + 1 项，在 element 的父元素链上查找
+          let parent = element;
+          while (parent.parentElement) {
+            let parent = parent.parentElement;
+            isMatch = isMatch && matchRule(rules, index + 1, parent);
+            if (isMatch) {
+              // 找到一个父元素匹配 前一层 rule
+              break;
+            }
+          }
+          // TODO 如果 rules 数组尚未穷尽（例如 `div p a` 这样三层以上的复杂选择器）
+          // 对匹配成功的 parent 递归调用 matchRule( rules, index + j, parent )？
+        } else if (rule.nestingOperator === '>') {
+          isMatch = isMatch && matchRule(rules, index + 1, element.parentElement);
+          // TODO 处理尚未穷尽的高层 rule
+          // isMatch = isMatch && matchRule(rules, index + j, parent);
+        } else if (rule.nestingOperator === '~') {
+          // TODO for (const peer of element.parentElement.children)
+          // 在当前元素的兄弟元素中，查找所有在当前元素之前的
+          // TODO 处理尚未穷尽的高层 rule
+        } else if (rule.nestingOperator === '+') {
+          // TODO
+          // 在当前元素的兄弟元素中，查找紧邻且在当前元素之前的
+          // TODO 处理尚未穷尽的高层 rule
+        }
+
+        return isMatch;
+      }
+
+      /** 元素的 classNames 包含规则中要求的全部项 */
+      function matchClasses(ruleClassNames, elementClassNames) {
+        let isMatch = true;
+        for (const ruleClass of ruleClassNames) {
+          isMatch = isMatch && elementClassNames.includes(ruleClass);
+          if (!isMatch) break;
+        }
+        return isMatch;
+      }
+
+      /** 元素所带的 attr 符合规则中 attrs 数组的全部项的要求 */
+      function matchAttrs(ruleAttrs, elem) {
+        if (!elem.hasAttributes()) return false;
+
+        let isMatch = true;
+        // 先判断元素的属性名集合包含所有规则中要求的属性名
+        let elemAttrNames = element.getAttributesNames();
+        for (const ruleAttr of ruleAttrs) {
+          isMatch = isMatch && elemAttrNames.includes(ruleAttr.name);
+          if (!isMatch) break;
+          // TODO 再判断 元素的属性值是否满足 ruleAttr.operator, .value 规则要求
+          // isMatch = isMatch && isAttrRuleFulfilled(ruleAttr, element.getAttribute(ruleAttr.name));
+        }
+
+        return isMatch;
+      }
+
+      /** 元素满足规则中要求的 pseudos 特性 */
+      function matchPseudos(rulePseudos, elem) {
+        // TODO
+        return true;
+      }
+    </script>
+  </body>
+</html>
