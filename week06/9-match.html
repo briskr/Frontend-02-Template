@@ -111,7 +111,11 @@
         methods: {
           test(sel, elemId) {
             const elem = document.getElementById(elemId);
-            this.result = match(sel, elem);
+            if (!elem) {
+              this.result = '未找到 ID=' + elemId + ' 的元素';
+            } else {
+              this.result = match(sel, elem);
+            }
           },
         },
       });
