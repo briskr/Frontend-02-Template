@@ -166,6 +166,8 @@
        * @param {number} index - rules 数组中当前执行匹配的元素下标
        * @param {Element} element - 要与当前 rule 进行匹配判定的 DOM 元素
        * @returns
+       *
+       * TODO 未调试
        */
       function matchRule(rules, index, element) {
         const rule = rules[index];
@@ -181,6 +183,8 @@
 
         // 本元素判定完成，开始判定 combinator 指定的关联元素
 
+        let nextElement; // 根据 combinator 匹配成功的下一个元素，需要递归继续完成匹配，直到把 rules 数组用完
+
         if (rule.nestingOperator === null) {
           // 非直接父子关系，用 rules 数组 index + 1 项，在 element 的父元素链上查找
           let parent = element;
@@ -189,24 +193,28 @@
             isMatch = isMatch && matchRule(rules, index + 1, parent);
             if (isMatch) {
               // 找到一个父元素匹配 前一层 rule
+              nextElement = parent;
               break;
             }
           }
-          // TODO 如果 rules 数组尚未穷尽（例如 `div p a` 这样三层以上的复杂选择器）
-          // 对匹配成功的 parent 递归调用 matchRule( rules, index + j, parent )？
         } else if (rule.nestingOperator === '>') {
           isMatch = isMatch && matchRule(rules, index + 1, element.parentElement);
-          // TODO 处理尚未穷尽的高层 rule
-          // isMatch = isMatch && matchRule(rules, index + j, parent);
+          nextElement = element.parentElement;
         } else if (rule.nestingOperator === '~') {
           // TODO for (const peer of element.parentElement.children)
-          // 在当前元素的兄弟元素中，查找所有在当前元素之前的
-          // TODO 处理尚未穷尽的高层 rule
+          // 在当前元素的兄弟元素中，查找所有在当前元素之前的，从紧邻开始，到父元素的首个 child 为止
+          // nextElement = the matched sibling
         } else if (rule.nestingOperator === '+') {
           // TODO
-          // 在当前元素的兄弟元素中，查找紧邻且在当前元素之前的
-          // TODO 处理尚未穷尽的高层 rule
+          // 在当前元素的兄弟元素中，查找在当前元素之前且紧邻的元素
+          // nextElement = the matched sibling
         }
+
+        // TODO 如果 rules 数组尚未穷尽
+        // if (index + 1 < rules.length - 1) {}
+        // 例如 `div p a` 这样三层以上的复杂选择器，当前元素是 a， nextElement 是匹配成功的 p，
+        // 此时应当继续从 p 元素出发，递归调用 matchRule(rules, index + 1, nextElement )？
+        // 判定 p 元素的父元素链当中是否存在匹配 div 选择器的元素
 
         return isMatch;
       }
