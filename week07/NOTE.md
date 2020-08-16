@@ -2,7 +2,7 @@
 
 > 作业：对 CSS 的属性进行分类
 
-以 [ markdown ](CSS-properties.md) 格式整理，没来得及转换成 xmind 脑图，请在 vscode 里折叠全部区块，再逐层展开查看层次结构。
+[以 markdown 格式整理](CSS-properties.md) ，没来得及转换成 xmind 脑图，请在 vscode 里折叠全部区块，再逐层展开查看层次结构。
 
 # 学习总结
 
