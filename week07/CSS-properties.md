@@ -110,7 +110,7 @@
     - inset-inline : shorthand - 方向视 writing mode 而定
       - inset-inline-start
       - inset-inline-end
-    - z-index - 分层
+    - z-index - 非静态定位元素的分层
     - clip - 对绝对定位元素的可视范围进行剪切
 
   - flex 排版相关
@@ -224,7 +224,7 @@
      - outline-style
      - outline-width
 
-  - 文字相关
+  - 文字绘制相关
 
     - color
     - text-decoration : shorthand
@@ -280,15 +280,15 @@
       - mask-repeat
       - mask-size
 
-    - box-shadow
+    - opacity - 整个元素透明处理
 
-    - opacity
+    - box-shadow
 
     - box-decoration-break - IFC 折行时的样式处理
 
-    - clip-path
+    - clip-path - 用形状或路径裁剪元素的可视区域
 
-    - transform - 图像变形
+    - transform - 图像变形处理
 
       - 可使用多种 <transform-function>
       - transform-box - 变形时采用的基准区域
@@ -303,12 +303,12 @@
 
     - filter - 图像滤镜处理
 
-    - mix-blend-mode - 与父元素混色
+    - mix-blend-mode - 与父元素混色模式
 
   - SVG 相关
     - fill
     - stroke
-    - paint-order - fill 和 stroke 绘制顺序
+    - paint-order - fill 和 stroke 绘制的先后
 
 ## 交互与动画 相关
 
