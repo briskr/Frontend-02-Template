@@ -1,0 +1,772 @@
+<script>
+  let names = Object.getOwnPropertyNames(window);
+  // 972
+
+  function filterOut(names, props) {
+    const set = new Set();
+    props.forEach((p) => set.add(p));
+    return names.filter((n) => !set.has(n));
+  }
+
+  {
+    const js = new Set();
+
+    // ECMAScript
+    const globals = [ 'globalThis','undefined','Infinity','NaN','eval','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','isFinite','isNaN','parseFloat','parseInt','Array','ArrayBuffer','BigInt','Boolean','DataView','Date','Error','Function','Map','Number','Object','Promise','Proxy','RegExp','Set','SharedArrayBuffer','String','Symbol','WeakMap','WeakSet','Atomics','JSON','Math','Reflect','Error','EvalError','RangeError','ReferenceError','SyntaxError','TypeError','URIError','TypedArray','BigInt64Array','BigUint64Array','Float32Array','Float64Array','Int8Array','Int16Array','Int32Array','Uint8Array','Uint16Array','Uint32Array' ];
+    names = filterOut(names, globals);
+
+    const functions = [
+      'escape', 'unescape'
+    ];
+    names = filterOut(names, functions);
+
+    const jsExt = [
+      'FinalizationRegistry', 'WeakRef'
+    ];
+    names = filterOut(names, jsExt);
+
+    // [DOM Standard on WHATWG](https://dom.spec.whatwg.org/)
+
+    // DOM 规定的 window 属性
+    const windowProps = [
+      'console',
+      'locationbar', 'menubar', 'personalbar', 'scrollbars', 'statusbar', 'toolbar',
+
+      'location',
+      'navigator',
+      'history',
+
+      'document', // DOM root
+
+      // 窗口尺寸
+      'innerWidth', 'innerHeight',
+      'outerWidth', 'outerHeight',
+
+      // 滚动位置
+      'screenX', 'screenLeft',
+      'screenY', 'screenTop',
+      'scrollX', 'pageXOffset',
+      'scrollY', 'pageYOffset',
+
+      // 当前事件, 只在事件处理器内有值
+      'event',
+
+      'name', 'open', 'close', 'closed', 'stop', // 开关、控制子窗口
+      'move', 'moveTo', 'moveBy', 
+      'resizeTo', 'resizeBy',
+      'window', 'parent', 'top', 'opener', 
+      'self', // 指向 window 自身，适用于 WebWorker
+      'frames', 'length', 'frameElement',
+
+      'alert', 'confirm', 'prompt', 'print', 'find',
+      'focus', 'blur',
+      'scroll', 'scrollBy', 'scrollTo',
+
+      // 屏幕显示区域信息
+      'screen',
+
+      // 扩展自定义元素
+      'customElements', // [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html)
+
+      // 选定文档范围, 可包含多个 Range
+      'getSelection',
+
+      // CSSOM 
+      'getComputedStyle',
+
+      // 测试是否匹配 Media Query
+      'matchMedia',
+      'devicePixelRatio',
+
+      // 动画帧
+      'requestAnimationFrame', 'cancelAnimationFrame',
+
+      // 跨域窗口间通信 [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent)
+      'postMessage',
+
+      // 扩展 API
+      // WindowOrWorkerGlobalScope mixin
+      'caches', 'crossOriginIsolated', 'indexedDB', 'isSecureContext', 'origin',
+      'btoa', 'atob', 
+      'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
+      'queueMicrotask',
+      'fetch', // [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+      'createImageBitmap', // Canvas
+      // [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+      'crypto',
+      // Storage
+      'localStorage', 'sessionStorage',
+
+      // Performance Timeline API, the High Resolution Time API, the Navigation Timing API, the User Timing API, and the Resource Timing API.
+      'performance',
+
+      // 非标准，IE / WebKit 支持 http://help.dottoro.com/ljwbrvow.php
+      'offscreenBuffering',
+
+      // 实验性扩展
+      'requestIdleCallback', 'cancelIdleCallback', // 空闲时处理后台任务
+
+      'visualViewport', // 只读，获取视口信息，移动浏览器缩放问题
+
+      'speechSynthesis', // 语音合成 [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
+
+      // [Trusted Types](https://w3c.github.io/webappsec-trusted-types/dist/spec/)
+      'trustedTypes',
+
+      // Chrome 厂家扩展
+      'chrome',
+
+      // webplatform.org 项目已停止
+      'clientInformation', // 含浏览器信息，键盘、蓝牙、USB 外设等信息
+      'styleMedia', // CSS media
+
+      // [WebSQL](https://www.w3.org/TR/webdatabase/) 已废弃
+      'openDatabase',
+
+      'status', // 原用于获取/设置状态栏文字，标准中保留，但无行为
+      // 废弃
+      'applicationCache',
+      'captureEvents',
+      'defaultStatus',
+      'directories',
+      'external', // External 类型
+      'defaultstatus', // 状态栏文字
+      'releaseEvents',
+
+      'BatteryManager',
+
+      // filterOut 函数自身
+      'filterOut',
+    ];
+
+    names = filterOut(names, windowProps);
+  }
+  
+  // 795
+
+  // Subclass of Node
+  names = names.filter( n => {
+    try {
+      return !(window[n].prototype instanceof Node);
+    } catch (err) {
+      return true;
+    }
+  }).filter( n => (n !== 'Node' && n !== 'NodeList'));
+
+  // 634
+
+  // event handlers
+  names = names.filter ( n => !n.match(/^on/));
+
+  // 530
+
+  // Webkit proprietary
+  names = names.filter ( n => !n.match(/^webkit/));
+
+  // 517
+
+  // 先整理小写开头的属性名称, 已计入 windowProps
+  //names = names.filter ( n => n.match(/^[a-z]/) );
+
+  // [ECMA 402](http://ecma-international.org/ecma-402/)
+  names = names.filter ( n => n !== 'Intl' );
+
+  // Additional Javascript Types
+  names = filterOut(names, [ 'Uint8ClampedArray' ]);
+
+  // 515
+
+  // Event Classes 含 DOM 基本 Event ，和暂未归入所属专门 API 的事件
+  {
+    /*  names = names.filter( n => {
+      try {
+        return (window[n].prototype instanceof Event);
+      } catch (err) {
+        return true;
+      }
+    }); */
+    const classes = [
+      'Event',
+      "UIEvent",
+      "MouseEvent", "WheelEvent", "PointerEvent", "KeyboardEvent", "InputEvent", "DragEvent", 
+      "CloseEvent",
+      "BeforeInstallPromptEvent",
+      "TransitionEvent",
+      "TextEvent", "SubmitEvent", "SecurityPolicyViolationEvent", "PromiseRejectionEvent", "ProgressEvent", "PopStateEvent", 
+      "PageTransitionEvent", "MutationEvent", 
+      "MessageEvent", "MediaQueryListEvent", "HashChangeEvent", "FormDataEvent", "FontFaceSetLoadEvent",
+      "FocusEvent", "ErrorEvent", "CustomEvent", "CompositionEvent", "BeforeUnloadEvent", 
+      "ApplicationCacheErrorEvent",
+      "DeviceMotionEvent", "DeviceOrientationEvent"
+    ];
+    names = filterOut(names, classes);
+  }
+
+  // Touch event
+  {
+    const classes = [ 'Touch', 'TouchList', 'TouchEvent'];
+    names = filterOut(names, classes);
+  }
+
+  // [Clipboard API](https://www.w3.org/TR/clipboard-apis/)
+  // navigator.clipboard
+  // Element event: copy, cut, paste
+  // Window event: clipboardchange
+  {
+    const classes = [ 'Clipboard', 'ClipboardEvent', 'ClipboardItem' ]
+    names = filterOut(names, classes);
+  }
+
+  // [Fetch](https://fetch.spec.whatwg.org/)
+  // [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+  // window.fetch()
+  {
+    const classes = [ 'Body', 'Headers', 'Request', 'Response' ]
+    names = filterOut(names, classes);
+  }
+
+  // [WebGL](https://www.khronos.org/webgl/)
+  // "WebGLVertexArrayObject", "WebGLUniformLocation", "WebGLTransformFeedback", "WebGLTexture", "WebGLSync", "WebGLShaderPrecisionFormat", "WebGLShader", "WebGLSampler", "WebGLRenderingContext", "WebGLRenderbuffer", "WebGLQuery", "WebGLProgram", "WebGLFramebuffer", "WebGLContextEvent", "WebGLBuffer", "WebGLActiveInfo", "WebGL2RenderingContext"
+  // 17
+  names = names.filter ( n => !n.match(/^WebGL/));
+
+  // [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API)
+  // 入口 navigator.geolocation
+  //"GeolocationPositionError", "GeolocationPosition", "GeolocationCoordinates", "Geolocation"
+  names = names.filter ( n => !n.match(/^Geolocation/));
+
+  // [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API)
+  // [Gamepad](https://www.w3.org/TR/gamepad/)
+  //"GamepadHapticActuator", "GamepadEvent", "Gamepad", "GamepadButton"
+  names = names.filter ( n => !n.match(/^Gamepad/));
+
+  // [Channel Messaging](https://html.spec.whatwg.org/multipage/web-messaging.html)
+  {
+    const classes = ['MessageChannel', 'MessagePort' ];
+    names = filterOut(names, classes);
+  }
+
+  // [Broadcast Channel API](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API)
+  // 同源的 browsing contexts (that is, windows, tabs, frames, or iframes) 和 workers 之间广播消息.
+  names = names.filter ( n => n !== 'BroadcastChannel' );
+
+  // [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
+  names = names.filter ( n => n !== 'WebSocket');
+
+  // [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+  // 33
+  {
+    let audioClasses = [ 'AnalyserNode', 'AudioBuffer', 'AudioBufferSourceNode', 'AudioContext', 'AudioContextOptions', 'AudioDestinationNode', 'AudioListener', 'AudioNode', 'AudioNodeOptions', 'AudioProcessingEvent', 'AudioScheduledSourceNode', 'AudioWorklet', 'AudioWorkletGlobalScope', 'AudioWorkletNode', 'AudioWorkletProcessor', 'BaseAudioContext', 'BiquadFilterNode', 'ChannelMergerNode', 'ChannelSplitterNode', 'ConstantSourceNode', 'ConvolverNode', 'DelayNode', 'DynamicsCompressorNode', 'GainNode', 'IIRFilterNode', 'MediaElementAudioSourceNode', 'MediaStreamAudioDestinationNode', 'MediaStreamAudioSourceNode', 'OfflineAudioCompletionEvent', 'OfflineAudioContext', 'OscillatorNode', 'PannerNode', 'PeriodicWave', 'StereoPannerNode', 'WaveShaperNode' ];
+    audioClasses = audioClasses.concat([ 'AudioParamMap', 'AudioParam' ]);
+    names = filterOut(names, audioClasses);
+  }
+  
+  // [Encoding API](https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API)
+  {
+    const classes = [ 'TextEncoder', 'TextDecoder' ];
+    names = filterOut(names, classes);
+  }
+
+  // [Compression Streams](https://wicg.github.io/compression/)
+  {
+    const classes = [ 'CompressionStream', 'DecompressionStream' ];
+    names = filterOut(names, classes);
+  }
+
+  // [Streams API](https://streams.spec.whatwg.org/)
+  // 实际排除9个
+  {
+    const classes = [ 'ByteLengthQueuingStrategy', 'CountQueuingStrategy',
+     'ReadableByteStreamController', 'ReadableStream',
+     'ReadableStreamBYOBReader', 'ReadableStreamBYOBRequest', 'ReadableStreamDefaultController', 'ReadableStreamDefaultReader',
+     'WritableStream', 'WritableStreamDefaultController', 'WritableStreamDefaultWriter',
+     'TransformStream', 'TransformStreamDefaultController',
+    ];
+    names = filterOut(names, classes);
+
+    const classes2 = [ 'TextEncoderStream', 'TextDecoderStream' ];
+    names = filterOut(names, classes2);
+  }
+
+  // [Media Session API](https://www.w3.org/TR/mediasession/)
+  // navigator.mediaSession
+  {
+    const classes = [ "MediaMetadata", "MediaSession" ];
+    names = filterOut(names, classes);
+  }
+
+  // [MediaStream API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API)
+  // [Media Capture and Streams](https://www.w3.org/TR/mediacapture-streams/)
+  // 7
+  {
+    const classes = [ 'MediaStream', 'MediaStreamEvent', 'MediaStreamTrack', 'MediaStreamTrackEvent', 'CanvasCaptureMediaStreamTrack',
+      'AudioStreamTrack', 'BlobEvent', 'MediaDevices', 'MediaTrackCapabilities', 'MediaTrackConstraints', 'MediaTrackSettings', 'MediaTrackSupportedConstraints', 'NavigatorUserMedia', 'NavigatorUserMediaError', 'VideoStreamTrack', 'DoubleRange', 'ConstrainDouble', 'LongRange', 'ConstrainLong', 'ConstrainBoolean', 'ConstrainDOMString',
+      'OverconstrainedError', 'InputDeviceInfo'
+    ];
+    names = filterOut(names, classes);
+  }
+
+  // [MediaStream Image Capture API](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Image_Capture_API)
+  // [MediaStream Image Capture](https://www.w3.org/TR/image-capture/)
+  {
+    const classes = [ 'ImageCapture', 'PhotoCapabilities', 'MediaSettingsRange' ];
+    names = filterOut(names, classes);
+  }
+
+  // [MediaStream Recording API](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API)
+  // [MediaStream Recording](https://www.w3.org/TR/mediastream-recording/)
+  {
+    const classes = [ 'MediaRecorder', 'MediaRecorderErrorEvent' ];
+    names = filterOut(names, classes);
+  }
+
+  // [Media Capabilities](https://w3c.github.io/media-capabilities/)
+  // navigator.mediaCapabilities
+  {
+    const classes = [ 'MediaCapabilities' ];
+    names = filterOut(names, classes);
+  }
+
+  // [WebVTT](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API)
+  // [WebVTT: The Web Video Text Tracks Format](https://www.w3.org/TR/webvtt1/)
+  {
+    const classes = [ 'VTTCue', 'TextTrackList', 'TextTrackCueList', 'TextTrackCue', 'TextTrack', 'TrackEvent'
+    ];
+    names = filterOut(names, classes);
+  }
+
+  // Canvas API (https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+  {
+    const classes = [ 'ImageBitmapRenderingContext', 'CanvasRenderingContext2D', 'OffscreenCanvasRenderingContext2D', 
+      'CanvasPattern', 'CanvasGradient', 'TextMetrics', 'Path2D', 'OffscreenCanvas',
+      'ImageBitmap', 'ImageData' ]
+    names = filterOut(names, classes);
+  }
+
+  // [Background Tasks API](https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API)
+  // window.requestIdleCallback()
+  // window.cancelIdleCallback()
+  {
+    const classes = [ 'IdleDeadline' ]
+    names = filterOut(names, classes);
+  }
+
+  // [Background Fetch](https://wicg.github.io/background-fetch/)
+  {
+    const classes = [ 'BackgroundFetchManager', 'BackgroundFetchRecord',  'BackgroundFetchRegistration' ]
+    names = filterOut(names, classes);
+  }
+
+  // [Web Background Synchronization](https://wicg.github.io/background-sync/spec/)
+  // [Web Periodic Background Synchronization](https://wicg.github.io/background-sync/spec/PeriodicBackgroundSync-index.html)
+  {
+    const classes = [ 'SyncManager', 'PeriodicSyncManager' ]
+    names = filterOut(names, classes);
+  }
+
+  // [Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
+  // [Web Storage (Second Edition)](https://www.w3.org/TR/webstorage/)
+  {
+    const classes = [ 'Storage', 'StorageEvent', 'StorageManager' ]
+    // 另外包括 window.sessionStorage 和 window.localStorage 两个实例
+    names = filterOut(names, classes);
+  }
+
+  // [WebRTC API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+  // 
+  // capture MediaStreams: navigator.mediaDevices.getUserMedia()
+  // screen recording: navigator.mediaDevices.getDisplayMedia()
+  // 20
+  //  RTCPeerConnection, RTCDataChannel, 
+  // const classes = ["RTCTrackEvent", "RTCStatsReport", "RTCSessionDescription", "RTCSctpTransport", "RTCRtpTransceiver", "RTCRtpSender", "RTCRtpReceiver", "RTCPeerConnectionIceEvent", "RTCPeerConnectionIceErrorEvent", "RTCPeerConnection", "RTCIceCandidate", "RTCErrorEvent", "RTCError", "RTCDtlsTransport", "RTCDataChannelEvent", "RTCDataChannel", "RTCDTMFToneChangeEvent", "RTCDTMFSender", "RTCCertificate", "RTCIceTransport"]
+  names = names.filter(n => !n.match(/^RTC/));
+  {
+    const classes = [ 'MediaDeviceInfo' ]
+    // 另外包括 window.sessionStorage 和 window.localStorage 两个实例
+    names = filterOut(names, classes);
+  }
+
+  // [SVG DOM API](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model#SVG_interfaces)
+  // const classes = ["SVGUnitTypes", "SVGTransformList", "SVGTransform", "SVGStringList", "SVGRect", "SVGPreserveAspectRatio", "SVGPointList", "SVGPoint", "SVGNumberList", "SVGNumber", "SVGMatrix", "SVGLengthList", "SVGLength", "SVGAnimatedTransformList", "SVGAnimatedString", "SVGAnimatedRect", "SVGAnimatedPreserveAspectRatio", "SVGAnimatedNumberList", "SVGAnimatedNumber", "SVGAnimatedLengthList", "SVGAnimatedLength", "SVGAnimatedInteger", "SVGAnimatedEnumeration", "SVGAnimatedBoolean", "SVGAnimatedAngle", "SVGAngle"]
+  // 26
+  names = names.filter(n => !n.match(/^SVG/));
+
+  // DOM 属性相关类
+  {
+    const classes = [ "DOMTokenList", "DOMStringMap", "DOMStringList", "DOMRectReadOnly", "DOMRectList", "DOMRect", "DOMQuad", "DOMPointReadOnly", "DOMPoint", "DOMParser", "DOMMatrixReadOnly", "DOMMatrix", "DOMImplementation", "DOMException",
+      'Window', 'Screen', 'Range', 'Selection', 'Navigator', 'DOMError', 'History',
+      "HTMLOptionsCollection", "HTMLFormControlsCollection", "HTMLCollection", "HTMLAllCollection",
+      'StaticRange', 'EventTarget',
+      'TimeRanges',
+      "DataTransferItemList", "DataTransferItem", "DataTransfer",
+      'Blob', "FileReader", "FileList", "File",
+      'Location',
+      'XMLSerializer',
+      'XMLHttpRequest', 'XMLHttpRequestUpload', 'XMLHttpRequestEventTarget', 'FormData',
+      "XPathResult", "XPathExpression", "XPathEvaluator",
+      'Plugin', 'PluginArray',
+      'MimeType', 'MimeTypeArray',
+      'MediaSource', 'SourceBuffer', 'SourceBufferList',
+      'ScriptProcessorNode', 'VideoPlaybackQuality',
+      'ValidityState',
+      'MediaError',
+      'TreeWalker', // document.createTreeWalker()
+
+      'RadioNodeList', 'NodeIterator', 'NodeFilter', 'NamedNodeMap',
+
+      'MutationRecord', 'MutationObserver',
+
+      "AbortSignal", "AbortController", // 用于中断 fetch
+
+      'CustomElementRegistry', 'ElementInternals', // [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html)
+
+      'BarProp', // 工具栏是否可见的信息
+
+      'External', // 废弃
+      'ApplicationCache',
+    ];
+    // 另外包括 window.sessionStorage 和 window.localStorage 两个实例
+    names = filterOut(names, classes);
+  }
+
+  // [URL](https://url.spec.whatwg.org/#api)
+  {
+    const classes = ['URL', 'URLSearchParams' ]
+    names = filterOut(names, classes);
+  }
+
+  // [Screen Orientation API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Orientation_API)
+  // [The Screen Orientation API](https://www.w3.org/TR/screen-orientation/)
+  {
+    const classes = ['ScreenOrientation'];
+    names = filterOut(names, classes);
+  }
+
+  // (https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
+  // [HTML chapter 9.2](https://html.spec.whatwg.org/multipage/server-sent-events.html)
+  {
+    const classes = ['EventSource'];
+    names = filterOut(names, classes);
+  }
+
+  // [Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API)
+  // [Notifications API](https://notifications.spec.whatwg.org/)
+  {
+    const classes = ['Notification', 'NotificationEvent'];
+    names = filterOut(names, classes);
+  }
+
+  // [Network Information API](https://wicg.github.io/netinfo/)
+  // navigator.connection
+  {
+    const classes = ['NetworkInformation'];
+    names = filterOut(names, classes);
+  }
+
+  // [Visual Viewport API](https://wicg.github.io/visual-viewport/)
+  // window.visualViewport
+  {
+    const classes = ['VisualViewport'];
+    names = filterOut(names, classes);
+  }
+
+  // [Resize Observer](https://www.w3.org/TR/resize-observer/)
+  // [Resize Observer API](https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API)
+  {
+    const classes = ['ResizeObserver', 'ResizeObserverEntry', 'ResizeObserverSize'];
+    names = filterOut(names, classes);
+  }
+
+  // [Layout Instability](https://wicg.github.io/layout-instability/)
+  {
+    const classes = ['LayoutShift', 'LayoutShiftAttribution'];
+    names = filterOut(names, classes);
+  }
+
+  // [Largest Contentful Paint API](https://wicg.github.io/largest-contentful-paint/)
+  {
+    const classes = ["LargestContentfulPaint"];
+    names = filterOut(names, classes);
+  }
+
+  // [Intersection Observer API](https://www.w3.org/TR/intersection-observer/)
+  {
+    const classes = ["IntersectionObserver", "IntersectionObserverEntry"];
+    names = filterOut(names, classes);
+  }
+
+  // [Input Device Capabilities](https://wicg.github.io/input-device-capabilities/)
+  {
+    const classes = ["InputDeviceCapabilities"];
+    names = filterOut(names, classes);
+  }
+  
+
+  // [Reporting API](https://www.w3.org/TR/reporting/)
+  // [Reporting API](https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API)
+  {
+    const classes = ['ReportingObserver', 'Report'];
+    names = filterOut(names, classes);
+  }
+
+  // CSSOM 相关类
+  // [CSS Object Model](https://www.w3.org/TR/cssom-1/)
+  //names = names.filter(n => !n.match(/^CSS/));
+  {
+    const classes = ["CSSSupportsRule", "CSSStyleSheet", "CSSStyleRule", "CSSStyleDeclaration", "CSSRuleList", "CSSRule", "CSSPageRule", "CSSNamespaceRule", "CSSMediaRule", "CSSKeyframesRule", "CSSKeyframeRule", "CSSImportRule", "CSSGroupingRule", "CSSFontFaceRule", "CSS", "CSSConditionRule", 
+      'StyleSheet', 'StyleSheetList',
+      'MediaList', //stylesheet.media 属性类型
+      'MediaQueryList', // window.matchMedia() 返回类型
+    ];
+    names = filterOut(names, classes);
+  }
+
+  // [CSS Font Loading](https://www.w3.org/TR/css-font-loading-3/)
+  {
+    const classes = ['FontFace', 'FontFaceSet', 'FontFaceSource'];
+    names = filterOut(names, classes);
+  }
+
+  // [CSS Typed Object Model](https://www.w3.org/TR/css-typed-om-1/)
+  // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model#CSS_Typed_Object_Model
+  {
+    const classes = [ "CSSStyleValue", "CSSNumericValue", "CSSNumericArray", "CSSUnitValue", "CSSKeywordValue", "CSSTransformValue", "CSSImageValue", "CSSPositionValue",
+      "CSSSkewY", "CSSSkewX", "CSSSkew", "CSSScale", "CSSTranslate", "CSSRotate", "CSSAnimation", "CSSTransition",
+      "CSSMathValue", "CSSMathSum", "CSSMathProduct", "CSSMathNegate", "CSSMathMin", "CSSMathMax", "CSSMathInvert",
+      "CSSVariableReferenceValue", "CSSUnparsedValue",
+      "CSSTransformComponent", "CSSPerspective", "CSSMatrixComponent",
+      'StylePropertyMap', 'StylePropertyMapReadOnly' ];
+    names = filterOut(names, classes);
+  }
+
+  // [Web Workers API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+  // [Web Workers on W3C](https://www.w3.org/TR/workers/)
+  // [HTML Chapter 10](https://html.spec.whatwg.org/multipage/workers.html)
+  // [Worklet](https://developer.mozilla.org/en-US/docs/Web/API/Worklet)
+  {
+    const classes = ["Worker", "SharedWorker", 'Worklet'];
+    names = filterOut(names, classes);
+  }
+
+  // [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+  // [Service Workers 1](https://www.w3.org/TR/service-workers/)
+  {
+    const classes = ["ServiceWorker", "ServiceWorkerContainer", "ServiceWorkerRegistration", "Cache", "CacheStorage",
+      "NavigationPreloadManager", //self.registration.navigationPreload
+    ];
+    names = filterOut(names, classes);
+  }
+
+  //[Performance API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API)
+  //[A Primer for Web Performance Timing APIs](https://w3c.github.io/perf-timing-primer/)
+  {
+    const classes = ["PerformanceTiming", "PerformanceServerTiming", "PerformanceResourceTiming", "PerformancePaintTiming", "PerformanceObserverEntryList", "PerformanceObserver", "PerformanceNavigationTiming", "PerformanceNavigation", "PerformanceMeasure", "PerformanceMark", "PerformanceEventTiming", "PerformanceEntry", "PerformanceElementTiming", "Performance"]
+    names = filterOut(names, classes);
+  }
+
+  // [Long Tasks API 1](https://w3c.github.io/longtasks)
+  {
+    const classes = [ 'PerformanceLongTaskTiming', 'TaskAttributionTiming' ];
+    names = filterOut(names, classes);
+  }
+
+  // [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)
+  // [Web Animations](https://www.w3.org/TR/web-animations-1/)
+  {
+    const classes = [ "Animation", "AnimationEffect", "KeyframeEffect", "AnimationTimeline", "DocumentTimeline",
+      "AnimationEvent", "AnimationPlaybackEvent",
+   ];
+    names = filterOut(names, classes);
+  }
+
+  // [WebXR Device API](https://www.w3.org/TR/webxr/)
+  //names = names.filter(n => n.match(/^XR/));
+  {
+    const classes = [ "XRDOMOverlayState", "XRLayer", "XRBoundedReferenceSpace", "XRFrame", "XRInputSource", "XRInputSourceArray", "XRPose", "XRReferenceSpace", "XRRenderState", "XRRigidTransform", "XRSession", "XRSpace", "XRSystem", "XRView", "XRViewerPose", "XRViewport", "XRWebGLLayer", "XRHitTestResult", "XRHitTestSource", "XRRay", "XRTransientInputHitTestResult", "XRTransientInputHitTestSource",
+      "XRInputSourceEvent", "XRInputSourcesChangeEvent", "XRReferenceSpaceEvent", "XRSessionEvent"];
+    names = filterOut(names, classes);
+  }
+
+  // [WebUSB API](https://wicg.github.io/webusb/)
+  //names = names.filter(n => n.match(/^USB/));
+  {
+    const classes = ["USB", "USBAlternateInterface", "USBConfiguration", "USBDevice", "USBEndpoint", "USBInterface", "USBInTransferResult", "USBIsochronousInTransferPacket", "USBIsochronousInTransferResult", "USBIsochronousOutTransferPacket", "USBIsochronousOutTransferResult", "USBOutTransferResult",
+      "USBConnectionEvent"]
+    names = filterOut(names, classes);
+  }
+
+  // [Presentation API](https://www.w3.org/TR/presentation-api/)
+  //names = names.filter(n => n.match(/^Presentation/));
+  {
+    const classes = [ "Presentation", "PresentationAvailability", "PresentationConnection", "PresentationConnectionList", "PresentationReceiver", "PresentationRequest",
+      "PresentationConnectionAvailableEvent", "PresentationConnectionCloseEvent"]
+    names = filterOut(names, classes);
+  }
+
+  // [Payment Request API](https://www.w3.org/TR/payment-request/)
+  // names = names.filter(n => n.match(/Payment/));
+  {
+    const classes = [ "PaymentInstruments", "PaymentManager", "PaymentAddress", "PaymentRequest", "PaymentResponse",
+      "PaymentRequestUpdateEvent", "PaymentMethodChangeEvent"];
+    names = filterOut(names, classes);
+  }
+
+  // [Web MIDI API](https://www.w3.org/TR/webmidi/)
+  //names = names.filter(n => n.match(/^MIDI/));
+  {
+    const classes = ["MIDIAccess", "MIDIInput", "MIDIInputMap", "MIDIOutput", "MIDIOutputMap", "MIDIPort",
+      "MIDIConnectionEvent", "MIDIMessageEvent"]
+    names = filterOut(names, classes);
+  }
+
+  // Speech Synthesis
+  // [Web Speech API](https://wicg.github.io/speech-api/)
+  {
+    const classes = ["SpeechSynthesisErrorEvent", "SpeechSynthesisEvent", "SpeechSynthesisUtterance" ]
+    names = filterOut(names, classes);
+  }
+
+  // [Encrypted Media Extensions API](https://www.w3.org/TR/encrypted-media/)
+  {
+    const classes = [ 'MediaKeys', 'MediaKeySession', 'MediaKeyStatusMap', 'MediaKeySystemAccess',
+      "MediaEncryptedEvent", "MediaKeyMessageEvent"];
+    names = filterOut(names, classes);
+  }
+
+  // [Indexed Database API 3.0](https://w3c.github.io/IndexedDB/)
+  // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+  {
+    const classes = [ "IDBVersionChangeEvent", "IDBTransaction", "IDBRequest", "IDBOpenDBRequest", "IDBObjectStore", "IDBKeyRange", "IDBIndex", "IDBFactory", "IDBDatabase", "IDBCursorWithValue", "IDBCursor", "IDBVersionChangeEvent"];
+    names = filterOut(names, classes);
+  }
+
+  // [Generic Sensor API](https://www.w3.org/TR/generic-sensor/)
+  {
+    const classes = [ "Sensor", 'OrientationSensor', 'AbsoluteOrientationSensor', 'RelativeOrientationSensor', 'LinearAccelerationSensor',
+      "SensorErrorEvent",
+      "Gyroscope", "Accelerometer",
+      'DeviceMotionEventAcceleration', 'DeviceMotionEventRotationRate', // 仅移动设备
+    ];
+    names = filterOut(names, classes);
+  }
+
+  // [Web Bluetooth CG](https://www.w3.org/community/web-bluetooth/)
+  // [Web Bluetooth on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
+  {
+    const classes = [ "Bluetooth", "BluetoothCharacteristicProperties", "BluetoothDevice", "BluetoothRemoteGATTCharacteristic",
+      "BluetoothRemoteGATTDescriptor", "BluetoothRemoteGATTServer", "BluetoothRemoteGATTService", "BluetoothUUID" ];
+    names = filterOut(names, classes);
+  }
+
+  // [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+  // [Web Cryptography API](https://www.w3.org/TR/WebCryptoAPI/)
+  {
+    const classes = [ "Crypto", "CryptoKey", "CryptoKeyPair", "SubtleCrypto" ];
+    names = filterOut(names, classes);
+  }
+
+  // [Web Authentication API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API)
+  // [Web Authentication: An API for accessing Public Key Credentials Level 1](https://www.w3.org/TR/webauthn/)
+  {
+    const classes = [ 'CredentialsContainer', 'PublicKeyCredential',
+      'AuthenticatorResponse', 'AuthenticatorAttestationResponse', 'AuthenticatorAssertionResponse'];
+    names = filterOut(names, classes);
+  }
+
+  // [Credential Management API](https://developer.mozilla.org/en-US/docs/Web/API/Credential_Management_API)
+  // [Credential Management Level 1](https://www.w3.org/TR/credential-management-1/)
+  {
+    const classes = ['Credential', 'CredentialsContainer', 'FederatedCredential', 'PasswordCredential'];
+    names = filterOut(names, classes);
+  }
+
+  // [Push API](https://www.w3.org/TR/push-api/)
+  // [Push API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
+  {
+    const classes = ['PushManager', 'PushSubscription', 'PushEvent', 'PushMessageData', 'PushSubscriptionOptions'];
+    names = filterOut(names, classes);
+  }
+
+  // [Permissions API](https://www.w3.org/TR/permissions/)
+  {
+    const classes = ['Permissions', 'PermissionStatus'];
+    names = filterOut(names, classes);
+  }
+
+  // [Web Locks API](https://wicg.github.io/web-locks/)
+  // navigator.locks
+  {
+    const classes = ['LockManager', 'Lock'];
+    names = filterOut(names, classes);
+  }
+
+  // [Wake Lock API](https://www.w3.org/TR/wake-lock/)
+  // navigator.wakelock()
+  {
+    const classes = ['WakeLock', 'WakeLockRequest', 'WakeLockSentinel'];
+    names = filterOut(names, classes);
+  }
+
+  // [Keyboard](https://developer.mozilla.org/en-US/docs/Web/API/Keyboard_API)
+  // keyboard layout
+  {
+    const classes = ['Keyboard', 'KeyboardLayoutMap'];
+    names = filterOut(names, classes);
+  }
+
+  // [Text Fragments](https://wicg.github.io/scroll-to-text-fragment/)
+  {
+    const classes = ['FragmentDirective'];
+    names = filterOut(names, classes);
+  }
+
+  // [Trusted Types](https://w3c.github.io/webappsec-trusted-types/dist/spec/)
+  {
+    const classes = ["TrustedHTML", "TrustedScript", "TrustedScriptURL", "TrustedTypePolicy", "TrustedTypePolicyFactory"];
+    names = filterOut(names, classes);
+  }
+
+  // [Picture-in-Picture](https://www.w3.org/TR/picture-in-picture/)
+  // videoElement.requestPictureInPicture()
+  {
+    const classes = ['PictureInPictureWindow', 'EnterPictureInPictureEvent'];
+    names = filterOut(names, classes);
+  }
+
+  // [Remote Playback API](https://www.w3.org/TR/remote-playback/)
+  {
+    const classes = ['RemotePlayback'];
+    names = filterOut(names, classes);
+  }
+
+  // [Permissions Policy](https://w3c.github.io/webappsec-permissions-policy/)
+  // https://w3c.github.io/webappsec-feature-policy/
+  {
+    const classes = [ 'FeaturePolicy', 'PermissionsPolicy'];
+    names = filterOut(names, classes);
+  }
+
+  // [Accelerated Shape Detection in Images](https://wicg.github.io/shape-detection-api/#barcodedetector)
+  // chrome 专有
+  {
+    const classes = ['BarcodeDetector'];
+    names = filterOut(names, classes);
+  }
+
+  // [User Activation](https://github.com/dtapuska/useractivation)
+  // chrome 专有
+  {
+    const classes = ['UserActivation'];
+    names = filterOut(names, classes);
+  }
+
+  // 非标准定义类
+  //https://developer.mozilla.org/en-US/docs/Web/API/XSLTProcessor
+  {
+    const classes = ['XSLTProcessor']
+    names = filterOut(names, classes);
+  }
+
+  console.log("remaining names: ", names.length);
+  console.log(names);
+</script>

@@ -1,0 +1,22 @@
+<style>
+  a::before {
+    color: red;
+    content: 'Hello';
+    background-color: antiquewhite;
+  }
+</style>
+<link rel="stylesheet" href="data:text/css,p%7Bcolor:blue;%7D" />
+<a> world</a>
+<script>
+  console.debug(document.styleSheets[0].cssRules);
+  console.debug(document.styleSheets[0].cssRules[0].style.cssText);
+  console.debug(document.styleSheets[0].cssRules[0].style[2]);
+
+  debugger;
+
+  document.styleSheets[0].cssRules[0].style.color = 'green';
+
+  const decl = getComputedStyle(document.querySelector('a'), '::before');
+  console.debug(Object.getOwnPropertyNames(decl).length);
+  console.debug(decl.color);
+</script>

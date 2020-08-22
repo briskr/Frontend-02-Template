@@ -1,0 +1,54 @@
+<div id="a">
+  <span>1</span>
+  <p>2</p>
+  <a>3</a>
+  <div>4</div>
+</div>
+
+<script>
+  function reverseChildren1(element) {
+    const children = Array.prototype.slice.call(element.childNodes);
+
+    for (const child of children) {
+      element.removeChild(child);
+    }
+    //或者用 element.innerHTML = ""; 实现清空
+
+    children.reverse();
+    //debugger;
+
+    for (const child of children) {
+      element.appendChild(child);
+    }
+  }
+
+  function reverseChildren2(element) {
+    let l = element.childNodes.length;
+    while (l-- > 0) {
+      element.appendChild(element.childNodes[l]);
+      //debugger;
+    }
+  }
+
+  function reverseChildrenRange(element) {
+    const range = new Range();
+    // 选取父节点内容
+    range.selectNodeContents(element);
+
+    // 摘取片段
+    const fragment = range.extractContents();
+    // 进行反序处理
+    let l = fragment.childNodes.length;
+    while (l-- > 0) {
+      fragment.appendChild(fragment.childNodes[l]);
+    }
+    // 放回去
+    element.appendChild(fragment);
+  }
+
+  const element = document.getElementById('a');
+
+  //reverseChildren1(element);
+  //reverseChildren2(element);
+  reverseChildrenRange(element);
+</script>

@@ -1,0 +1,19 @@
+<style>
+  .container {
+    width: 100px;
+    height: 100px;
+    overflow: scroll;
+  }
+  .x {
+    background-color: lightblue;
+  }
+  .x::before {
+    content: 'extra contents 额外内容 额外内容';
+    background-color: antiquewhite;
+  }
+</style>
+<div class="container">文字 文字 <span class="x">文字 文字 文字 文字 文字 文字</span></div>
+<script>
+  const x = document.getElementsByClassName('x')[0];
+  console.log(x.getClientRects().length);
+</script>
