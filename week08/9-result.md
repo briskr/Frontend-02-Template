@@ -20,23 +20,24 @@
 
   - [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
 
-- [Clipboard API](https://www.w3.org/TR/clipboard-apis/)
-
 - [WebGL](https://www.khronos.org/webgl/)
 
 - [Geolocation API Specification 2nd Edition](https://www.w3.org/TR/geolocation-API/)
 
   - [Geolocation API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API)
 
-- [Gamepad](https://www.w3.org/TR/gamepad/)
+- [Clipboard API](https://www.w3.org/TR/clipboard-apis/)
 
-  - [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API)
+- [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
+
+- [WebRTC 1.0: Real-time Communication Between Browsers](https://www.w3.org/TR/webrtc/)
+
+  - [WebRTC API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
 
 - [Channel Messaging](https://html.spec.whatwg.org/multipage/web-messaging.html)
 
 - [Broadcast Channel API](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API)
 
-- [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
 
 - [Web Audio API](https://www.w3.org/TR/webaudio/)
 
@@ -66,6 +67,16 @@
 
   - [WebVTT](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API)
 
+- [Gamepad](https://www.w3.org/TR/gamepad/)
+
+  - [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API)
+
+- [Web Animations](https://www.w3.org/TR/web-animations-1/)
+
+  - [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)
+
+- [WebXR Device API](https://www.w3.org/TR/webxr/)
+
 
 - [Web Storage (Second Edition)](https://www.w3.org/TR/webstorage/)
 
@@ -83,31 +94,24 @@
 
   - [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 
-- [Long Tasks API 1](https://w3c.github.io/longtasks)
+- [HTML chapter 9.2: Server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html)
+
+  - [Server Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
 
 - [Background Tasks API](https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API)
 
 - [Background Fetch](https://wicg.github.io/background-fetch/)
 
+- [Long Tasks API 1](https://w3c.github.io/longtasks)
+
 - [Web Background Synchronization](https://wicg.github.io/background-sync/spec/)
 
-- [Web Periodic Background Synchronization](https://wicg.github.io/background-sync/spec/PeriodicBackgroundSync-index.html)
+  - [Web Periodic Background Synchronization](https://wicg.github.io/background-sync/spec/PeriodicBackgroundSync-index.html)
 
-- [WebRTC 1.0: Real-time Communication Between Browsers](https://www.w3.org/TR/webrtc/)
-
-  - [WebRTC API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
 
 - [Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html)
 
 - [URL](https://url.spec.whatwg.org/#api)
-
-- [The Screen Orientation API](https://www.w3.org/TR/screen-orientation/)
-
-  - [Screen Orientation API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Orientation_API)
-
-- [HTML chapter 9.2: Server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html)
-
-  - [Server Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
 
 - [Notifications API](https://notifications.spec.whatwg.org/)
 
@@ -116,6 +120,10 @@
 - [Network Information API](https://wicg.github.io/netinfo/)
 
 - [Visual Viewport API](https://wicg.github.io/visual-viewport/)
+
+- [The Screen Orientation API](https://www.w3.org/TR/screen-orientation/)
+
+  - [Screen Orientation API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Orientation_API)
 
 - [Resize Observer](https://www.w3.org/TR/resize-observer/)
 
@@ -136,12 +144,6 @@
 - [A Primer for Web Performance Timing APIs](https://w3c.github.io/perf-timing-primer/)
 
   - [Performance API on MDN](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API)
-
-- [Web Animations](https://www.w3.org/TR/web-animations-1/)
-
-  - [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)
-
-- [WebXR Device API](https://www.w3.org/TR/webxr/)
 
 - [WebUSB API](https://wicg.github.io/webusb/)
 
@@ -195,6 +197,6 @@
 
   - [Feature policy](https://w3c.github.io/webappsec-feature-policy/)
 
-- [Keyboard](https://developer.mozilla.org/en-US/docs/Web/API/Keyboard_API)
+- [Keyboard (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Keyboard_API)
 
-- [Encoding API](https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API)
+- [Encoding API (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API)
