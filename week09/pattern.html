@@ -1,57 +1,105 @@
 <html>
-<head>
-  <style>
-    .cell {
-      width: 100px;
-      height: 100px;
-      background-color: lightsteelblue;
-      display: inline-block;
-      border: 1px solid white;
-      line-height: 100px;
-      vertical-align: middle;
-      text-align: center;
-      font-size: 50px;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="board"></div>
-
-  <script>
-    const pattern = [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0],
-    ];
-  
-    function show() {
-      const board = document.getElementById('board');
-      board.innerHTML = '';
-
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-          const cell = document.createElement('div');
-          cell.classList.add('cell');
-          cell.innerText = 
-            pattern[i][j] === 2 ? "❌" :
-            pattern[i][j] === 1 ? '⭕' : '';
-          cell.addEventListener('click', () => move(i, j));
-          board.appendChild(cell);
-        }
-        board.appendChild(document.createElement('br'));
+  <head>
+    <style>
+      .cell {
+        width: 100px;
+        height: 100px;
+        background-color: lightsteelblue;
+        display: inline-block;
+        border: 1px solid white;
+        line-height: 100px;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 50px;
       }
-    }
+    </style>
+  </head>
 
-    let color = 1;
-    function move(x, y) {
-      pattern[x][y] = color;
-      color = 3 - color;
+  <body>
+    <div id="board"></div>
+
+    <script>
+      // 1 = O, 2 = X
+      const pattern = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
+
+      function show() {
+        const board = document.getElementById('board');
+        board.innerHTML = '';
+
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 3; c++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.innerText = pattern[r][c] === 2 ? '❌' : pattern[r][c] === 1 ? '⭕' : '';
+            cell.addEventListener('click', () => move(c, r));
+            board.appendChild(cell);
+          }
+          board.appendChild(document.createElement('br'));
+        }
+      }
+
+      function check() {
+        for (let r = 0; r < 3; r++) {
+          let win = true;
+          for (let c = 0; c < 3; c++) {
+            if (pattern[r][c] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win)
+            return true;
+        }
+        for (let c = 0; c < 3; c++) {
+          let win = true;
+          for (let r = 0; r < 3; r++) {
+            if (pattern[r][c] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win)
+            return true;
+        }
+        {
+          let win = true;
+          for (let r = 0; r < 3; r++) {
+            if (pattern[r][r] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win)
+            return true;
+        }
+        {
+          let win = true;
+          for (let r = 0; r < 3; r++) {
+            if (pattern[r][2 - r] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win)
+            return true;
+        }
+      }
+
+      let color = 1;
+      function move(c, r) {
+        pattern[r][c] = color;
+        if (check()) {
+          alert((color === 2 ? '❌' : '⭕') + ' has won!');
+        }
+        show();
+        color = 3 - color;
+      }
+
       show();
-    }
-
-    show();
-  
-  </script>  
-</body>
+    </script>
+  </body>
 </html>
