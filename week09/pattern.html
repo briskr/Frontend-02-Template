@@ -1,0 +1,57 @@
+<html>
+<head>
+  <style>
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: lightsteelblue;
+      display: inline-block;
+      border: 1px solid white;
+      line-height: 100px;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="board"></div>
+
+  <script>
+    const pattern = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ];
+  
+    function show() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.innerText = 
+            pattern[i][j] === 2 ? "❌" :
+            pattern[i][j] === 1 ? '⭕' : '';
+          cell.addEventListener('click', () => move(i, j));
+          board.appendChild(cell);
+        }
+        board.appendChild(document.createElement('br'));
+      }
+    }
+
+    let color = 1;
+    function move(x, y) {
+      pattern[x][y] = color;
+      color = 3 - color;
+      show();
+    }
+
+    show();
+  
+  </script>  
+</body>
+</html>
