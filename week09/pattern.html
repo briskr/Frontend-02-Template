@@ -37,7 +37,7 @@
             const cell = document.createElement('div');
             cell.classList.add('cell');
             cell.innerText = pattern[subscript(r, c)] === 2 ? '❌' : pattern[subscript(r, c)] === 1 ? '⭕' : '';
-            cell.addEventListener('click', () => move(r, c));
+            cell.addEventListener('click', () => playerMove(r, c));
             board.appendChild(cell);
           }
           board.appendChild(document.createElement('br'));
@@ -46,7 +46,7 @@
 
       let color = 1;
       const colorIcon = (color) => (color === 2 ? '❌' : '⭕');
-      const otherColorFor = (color) => 3 - color;
+      const alternateColor = (color) => 3 - color;
 
       function showHint(color, choice) {
         if (choice.point) {
@@ -56,19 +56,38 @@
         }
       }
 
-      function move(r, c) {
-        pattern[subscript(r, c)] = color;
+      function checkAndAnnounceWinner() {
         if (check(pattern, color)) {
           alert(colorIcon(color) + ' has won!');
         }
-        show();
+      }
+
+      function playerMove(r, c) {
+        pattern[subscript(r, c)] = color;
+        checkAndAnnounceWinner();
         showHint(color, bestChoice(pattern, color));
 
-        color = otherColorFor(color);
+        show();
+        color = alternateColor(color);
+        computerMove();
+
+        /* 
+        color = alternateColor(color);
         showHint(color, bestChoice(pattern, color));
         if (willWin(pattern, color)) {
           console.log(colorIcon(color) + 'will win');
+        } */
+      }
+
+      function computerMove() {
+        const choice = bestChoice(pattern, color);
+        if (choice.point) {
+          pattern[subscript(choice.point[1], choice.point[0])] = color;
         }
+        show();
+        checkAndAnnounceWinner();
+
+        color = alternateColor(color);
       }
 
       function check(pattern, color) {
@@ -159,7 +178,7 @@
             let supposed = clone(pattern);
             supposed[subscript(r, c)] = color;
             // 计算对方在此场景下的最优选择
-            let opponentResult = bestChoice(supposed, otherColorFor(color)).result;
+            let opponentResult = bestChoice(supposed, alternateColor(color)).result;
 
             if (-opponentResult > result) {
               result = -opponentResult;
