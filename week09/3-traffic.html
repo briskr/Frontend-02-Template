@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <style>
+      #box {
+        background-color: #303030;
+        height: 50px;
+        width: 150px;
+        display: flex;
+        box-sizing: border-box;
+        justify-content: space-evenly;
+        align-items: center;
+      }
+      .lamp {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid;
+      }
+      .lamp.red {
+        border-color: red;
+      }
+      .lamp.red.on {
+        background-color: red;
+      }
+      .lamp.yellow {
+        border-color: gold;
+      }
+      .lamp.yellow.on {
+        background-color: gold;
+      }
+      .lamp.green {
+        border-color: green;
+      }
+      .lamp.green.on {
+        background-color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="box">
+      <div class="lamp red"></div>
+      <div class="lamp yellow"></div>
+      <div class="lamp green"></div>
+    </div>
+    <p id="msg"></p>
+    <script>
+      let box = document.getElementById('box');
+
+      function turnOn(color) {
+        for (const lamp of box.children) {
+          if (lamp.classList.contains(color)) {
+            if (!lamp.classList.contains('on')) {
+              lamp.classList.add('on');
+            }
+          } else if (lamp.classList.contains('on')) {
+            lamp.classList.remove('on');
+          }
+        }
+      }
+
+      const settings = [
+        { color: 'green', timeout: 10 },
+        { color: 'yellow', timeout: 2 },
+        { color: 'red', timeout: 5 },
+      ];
+
+      let currentIndex = 0;
+      const nextSetting = () => {
+        currentIndex = (currentIndex + 1) % settings.length;
+      };
+
+      const currentSetting = () => settings[currentIndex];
+
+      function update() {
+        turnOn(currentSetting().color);
+        setTimeout(update, currentSetting().timeout * 1000);
+        let timeout = currentSetting().timeout;
+        nextSetting();
+        document.getElementById('msg').innerHTML = `将在 ${timeout} 秒后切换到 ${currentSetting().color}`;
+      }
+
+      update();
+
+      // sleep
+      function sleep(t) {
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, t);
+        });
+      }
+
+      // co / generator 模式
+      function* go() {
+        while (true) {
+          green();
+          yield sleep(1000);
+          yellow();
+          yield sleep(200);
+          red();
+          yield sleep(500);
+        }
+      }
+
+      function run(iterator) {
+        const { value, done } = iterator.next();
+        if (done) return;
+        if (value instanceof Promise) {
+          value.then(() => {
+            run(iterator);
+          });
+        }
+      }
+
+      // wrap a generator function to 'run' it
+      function co(generatorFunc) {
+        return function () {
+          return run(generatorFunc());
+        };
+      }
+
+      // 异步迭代器示例
+      async function* counter() {
+        let i = 0;
+        while (true) {
+          await sleep(1000);
+          yield i++;
+        }
+      }
+
+      const count = async function () {
+        for await (let c of counter()) {
+          console.log(c);
+        }
+      };
+    </script>
+  </body>
+</html>
