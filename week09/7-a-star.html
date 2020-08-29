@@ -27,6 +27,9 @@
 
     <script>
       class Sorted {
+        /**
+         * 实现能够提取集合中最小元素的数据结构
+         */
         constructor(data, compare) {
           this.data = data.slice();
           this.compare = compare || ((a, b) => a - b);
@@ -59,6 +62,113 @@
         give(v) {
           this.data.push(v);
         }
+
+        get length() {
+          return this.data.length;
+        }
+      }
+
+      // 点阵图数据结构
+      let map = localStorage['map'] ? JSON.parse(localStorage['map']) : Array(10000).fill(0);
+
+      /**
+       * 把内存中的 map 保存到 localStorage
+       */
+      function save() {
+        localStorage['map'] = JSON.stringify(map);
+      }
+
+      /**
+       * 根据 x,y 坐标计算在一维数组中的下标
+       */
+      const subscript = (x, y) => 100 * y + x;
+
+      // 绘制用来表示 map 内容的 DOM 元素
+      let container = document.getElementById('container');
+      for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+
+          if (map[subscript(x, y)] === 1) {
+            cell.style.backgroundColor = 'black';
+          }
+
+          cell.addEventListener('mousemove', () => {
+            if (mouseDown) {
+              if (clear) {
+                cell.style.backgroundColor = '';
+                map[subscript(x, y)] = 0;
+              } else {
+                cell.style.backgroundColor = 'black';
+                map[subscript(x, y)] = 1;
+              }
+            }
+          });
+
+          container.appendChild(cell);
+        }
+      }
+
+      let mouseDown = false;
+      let clear = false;
+      document.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        clear = e.button === 2;
+      });
+      document.addEventListener('mouseup', () => (mouseDown = false));
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      function sleep(t) {
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, t);
+        });
+      }
+
+      /**
+       * 寻路算法
+       */
+      async function findPath(map, start, end) {
+        // 用队列实现广度优先，用栈实现深度优先
+        const queue = new Sorted([start], (a, b) => distance(a) - distance(b));
+
+        function distance(point) {
+          return (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2;
+        }
+
+        /**
+         * 把 [x, y] 点加入搜索集
+         * @param prev {Point} 记录本节点被加入搜索集时的出发点
+         * // TODO 应用 prev 优化路径
+         */
+        async function insert(x, y, prev) {
+          // 超出边界
+          if (x < 0 || x >= 100 || y < 0 || y >= 100) return;
+          // 撞墙
+          if (map[subscript(x, y)]) return;
+
+          // 标记已访问
+          await sleep(1);
+          container.children[subscript(x, y)].style.backgroundColor = 'lightgreen';
+          map[subscript(x, y)] = 2;
+          queue.give([x, y]);
+        }
+
+        while (queue.length) {
+          // 取队列头
+          const [x, y] = queue.take();
+          //console.debug(x, y);
+          // 判定队首元素是否到达终点
+          if (x === end[0] && y === end[1]) {
+            return true;
+          }
+          // 待搜索的点加入队列
+          await insert(x - 1, y);
+          await insert(x, y - 1);
+          await insert(x + 1, y);
+          await insert(x, y + 1);
+        }
+        return false;
       }
     </script>
   </body>
