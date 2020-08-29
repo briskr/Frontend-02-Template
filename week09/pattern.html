@@ -26,8 +26,6 @@
         [0, 0, 0],
       ];
 
-      const colorIcon = (color) => color === 2 ? '❌' : '⭕';
-
       function show() {
         const board = document.getElementById('board');
         board.innerHTML = '';
@@ -44,6 +42,33 @@
         }
       }
 
+      let color = 1;
+      const colorIcon = (color) => (color === 2 ? '❌' : '⭕');
+      const otherColorFor = (color) => 3 - color;
+
+      function showHint(color, choice) {
+        if (choice.point) {
+          console.log(`best choice for ${colorIcon(color)}: [${choice.point[0]}, ${choice.point[1]}] (expectation: ${choice.result})`)
+        } else {
+          console.log(`no choice for ${colorIcon(color)}`);
+        }
+      }
+
+      function move(c, r) {
+        pattern[r][c] = color;
+        if (check(pattern, color)) {
+          alert(colorIcon(color) + ' has won!');
+        }
+        show();
+        showHint(color, bestChoice(pattern, color));
+
+        color = otherColorFor(color);
+        showHint(color, bestChoice(pattern, color));
+        if (willWin(pattern, color)) {
+          console.log(colorIcon(color) + 'will win');
+        }
+      }
+
       function check(pattern, color) {
         for (let r = 0; r < 3; r++) {
           let win = true;
@@ -53,8 +78,7 @@
               break;
             }
           }
-          if (win)
-            return true;
+          if (win) return true;
         }
         for (let c = 0; c < 3; c++) {
           let win = true;
@@ -64,8 +88,7 @@
               break;
             }
           }
-          if (win)
-            return true;
+          if (win) return true;
         }
         {
           let win = true;
@@ -75,8 +98,7 @@
               break;
             }
           }
-          if (win)
-            return true;
+          if (win) return true;
         }
         {
           let win = true;
@@ -86,21 +108,7 @@
               break;
             }
           }
-          if (win)
-            return true;
-        }
-      }
-
-      let color = 1;
-      function move(c, r) {
-        pattern[r][c] = color;
-        if (check(pattern, color)) {
-          alert(colorIcon(color) + ' has won!');
-        }
-        show();
-        color = 3 - color;
-        if (willWin(pattern, color)) {
-          console.log(colorIcon(color) + 'will win');
+          if (win) return true;
         }
       }
 
@@ -112,20 +120,63 @@
         for (let r = 0; r < 3; r++) {
           for (let c = 0; c < 3; c++) {
             // 跳过有子位置
-            if (pattern[r][c])
-              continue;
+            if (pattern[r][c]) continue;
             // 假设在此空白位置落子，判定是否胜利
             let supposedPattern = clone(pattern);
             supposedPattern[r][c] = color;
             if (check(supposedPattern, color)) {
-              return true;
+              return [c, r];
             }
           }
         }
-        return false;
+        return null;
+      }
+
+      function bestChoice(pattern, color) {
+        let p;
+        if ((p = willWin(pattern, color))) {
+          return {
+            point: p,
+            result: 1,
+          };
+        }
+
+        // result: -2=less_than_any, -1=lose, 0=tie, 1=win
+        let result = -2;
+        let point = null;
+
+        // 遍历尚未落子的位置，查找是否有胜率较高的位置
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 3; c++) {
+            // 跳过已落子位置
+            if (pattern[r][c]) 
+              continue;
+
+            // 假定本方在此落子
+            let supposed = clone(pattern);
+            supposed[r][c] = color;
+            // 计算对方在此场景下的最优选择
+            let opponentResult = bestChoice(supposed, otherColorFor(color)).result;
+
+            if (-opponentResult > result) {
+              result = -opponentResult;
+              point = [c, r];
+            }
+            // 已找到胜手，可以剪枝
+            // if (result === 1)
+            //   break;
+          }
+          // if (result === 1)
+          //     break;
+        }
+        return {
+          point,
+          result: point ? result : 0
+        }
       }
 
       show();
+
     </script>
   </body>
 </html>
