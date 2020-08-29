@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Map</title>
     <style>
       #container {
@@ -69,6 +68,40 @@
       });
       document.addEventListener('mouseup', () => (mouseDown = false));
       document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      /**
+       * 寻路算法
+       */
+      function path(map, start, end) {
+        // 用队列实现广度优先，用栈实现深度优先
+        const queue = [start];
+
+        function insert(x, y) {
+          // 超出边界
+          if (x < 0 || x >= 100 || y < 0 || y >= 100) return;
+          // 撞墙
+          if (map[subscript(x, y)]) return;
+          // 标记已访问
+          map[subscript(x, y)] = 2;
+          queue.push([x, y]);
+        }
+
+        while (queue.length) {
+          // 取队列头
+          const [x, y] = queue.shift();
+          console.debug(x, y);
+          // 判定队首元素是否到达终点
+          if (x === end[0] && y === end[1]) {
+            return true;
+          }
+          // 待搜索的点加入队列尾
+          insert(x - 1, y);
+          insert(x, y - 1);
+          insert(x + 1, y);
+          insert(x, y + 1);
+        }
+        return false;
+      }
     </script>
   </body>
 </html>
