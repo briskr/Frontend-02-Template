@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Map</title>
+    <style>
+      #container {
+        width: 701px;
+        font-size: 0px;
+      }
+      .cell {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        line-height: 6px;
+        background-color: lightgray;
+        border-style: solid;
+        border-color: white;
+        border-width: 0 1px 1px 0;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <button onclick="save()">Save</button>
+
+    <script>
+      let map = localStorage['map'] ? JSON.parse(localStorage['map']) : Array(10000).fill(0);
+
+      function save() {
+        localStorage['map'] = JSON.stringify(map);
+      }
+
+      const subscript = (x, y) => 100 * y + x;
+
+      let container = document.getElementById('container');
+      for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+
+          if (map[subscript(x, y)] === 1) {
+            cell.style.backgroundColor = 'black';
+          }
+
+          cell.addEventListener('mousemove', () => {
+            if (mouseDown) {
+              if (clear) {
+                cell.style.backgroundColor = '';
+                map[subscript(x, y)] = 0;
+              } else {
+                cell.style.backgroundColor = 'black';
+                map[subscript(x, y)] = 1;
+              }
+            }
+          });
+
+          container.appendChild(cell);
+        }
+      }
+
+      let mouseDown = false;
+      let clear = false;
+      document.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        clear = e.button === 2;
+      });
+      document.addEventListener('mouseup', () => (mouseDown = false));
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      function sleep(t) {
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, t);
+        });
+      }
+
+      /**
+       * 寻路算法
+       */
+      async function path(map, start, end) {
+        // 用队列实现广度优先，用栈实现深度优先
+        const queue = [start];
+
+        async function insert(x, y) {
+          // 超出边界
+          if (x < 0 || x >= 100 || y < 0 || y >= 100) return;
+          // 撞墙
+          if (map[subscript(x, y)]) return;
+
+          // 标记已访问
+          await sleep(0);
+          container.children[subscript(x, y)].style.backgroundColor = 'lightgreen';
+          map[subscript(x, y)] = 2;
+          queue.push([x, y]);
+        }
+
+        while (queue.length) {
+          // 取队列头
+          const [x, y] = queue.shift();
+          //console.debug(x, y);
+          // 判定队首元素是否到达终点
+          if (x === end[0] && y === end[1]) {
+            return true;
+          }
+          // 待搜索的点加入队列尾
+          await insert(x - 1, y);
+          await insert(x, y - 1);
+          await insert(x + 1, y);
+          await insert(x, y + 1);
+        }
+        return false;
+      }
+    </script>
+  </body>
+</html>
