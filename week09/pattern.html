@@ -21,10 +21,12 @@
     <script>
       // 1 = O, 2 = X
       const pattern = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
       ];
+
+      const subscript = (r, c) => r * 3 + c;
 
       function show() {
         const board = document.getElementById('board');
@@ -34,8 +36,8 @@
           for (let c = 0; c < 3; c++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
-            cell.innerText = pattern[r][c] === 2 ? '❌' : pattern[r][c] === 1 ? '⭕' : '';
-            cell.addEventListener('click', () => move(c, r));
+            cell.innerText = pattern[subscript(r, c)] === 2 ? '❌' : pattern[subscript(r, c)] === 1 ? '⭕' : '';
+            cell.addEventListener('click', () => move(r, c));
             board.appendChild(cell);
           }
           board.appendChild(document.createElement('br'));
@@ -54,8 +56,8 @@
         }
       }
 
-      function move(c, r) {
-        pattern[r][c] = color;
+      function move(r, c) {
+        pattern[subscript(r, c)] = color;
         if (check(pattern, color)) {
           alert(colorIcon(color) + ' has won!');
         }
@@ -73,7 +75,7 @@
         for (let r = 0; r < 3; r++) {
           let win = true;
           for (let c = 0; c < 3; c++) {
-            if (pattern[r][c] !== color) {
+            if (pattern[subscript(r, c)] !== color) {
               win = false;
               break;
             }
@@ -83,7 +85,7 @@
         for (let c = 0; c < 3; c++) {
           let win = true;
           for (let r = 0; r < 3; r++) {
-            if (pattern[r][c] !== color) {
+            if (pattern[subscript(r, c)] !== color) {
               win = false;
               break;
             }
@@ -93,7 +95,7 @@
         {
           let win = true;
           for (let r = 0; r < 3; r++) {
-            if (pattern[r][r] !== color) {
+            if (pattern[subscript(r, r)] !== color) {
               win = false;
               break;
             }
@@ -103,7 +105,7 @@
         {
           let win = true;
           for (let r = 0; r < 3; r++) {
-            if (pattern[r][2 - r] !== color) {
+            if (pattern[subscript(r, 2 - r)] !== color) {
               win = false;
               break;
             }
@@ -113,17 +115,18 @@
       }
 
       function clone(pattern) {
-        return JSON.parse(JSON.stringify(pattern));
+        // 把 pattern 放在原型链上，只有修改的下标存在于 clone 结果对象上，其他下标转回原 pattern 读
+        return Object.create(pattern);
       }
 
       function willWin(pattern, color) {
         for (let r = 0; r < 3; r++) {
           for (let c = 0; c < 3; c++) {
             // 跳过有子位置
-            if (pattern[r][c]) continue;
+            if (pattern[subscript(r, c)]) continue;
             // 假设在此空白位置落子，判定是否胜利
             let supposedPattern = clone(pattern);
-            supposedPattern[r][c] = color;
+            supposedPattern[subscript(r, c)] = color;
             if (check(supposedPattern, color)) {
               return [c, r];
             }
@@ -146,15 +149,15 @@
         let point = null;
 
         // 遍历尚未落子的位置，查找是否有胜率较高的位置
-        for (let r = 0; r < 3; r++) {
+        outer: for (let r = 0; r < 3; r++) {
           for (let c = 0; c < 3; c++) {
             // 跳过已落子位置
-            if (pattern[r][c]) 
+            if (pattern[subscript(r, c)]) 
               continue;
 
             // 假定本方在此落子
             let supposed = clone(pattern);
-            supposed[r][c] = color;
+            supposed[subscript(r, c)] = color;
             // 计算对方在此场景下的最优选择
             let opponentResult = bestChoice(supposed, otherColorFor(color)).result;
 
@@ -163,11 +166,9 @@
               point = [c, r];
             }
             // 已找到胜手，可以剪枝
-            // if (result === 1)
-            //   break;
+            if (result === 1)
+              break outer;
           }
-          // if (result === 1)
-          //     break;
         }
         return {
           point,
