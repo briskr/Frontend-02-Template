@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map</title>
+    <style>
+      #container {
+        width: 701px;
+        font-size: 0px;
+      }
+      .cell {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        line-height: 6px;
+        background-color: lightgray;
+        border-style: solid;
+        border-color: white;
+        border-width: 0 1px 1px 0;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <button onclick="save()">Save</button>
+
+    <script>
+      let map = localStorage['map'] ? JSON.parse(localStorage['map']) : Array(10000).fill(0);
+
+      function save() {
+        localStorage['map'] = JSON.stringify(map);
+      }
+
+      const subscript = (x, y) => 100 * y + x;
+
+      let container = document.getElementById('container');
+      for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+
+          if (map[subscript(x, y)] === 1) {
+            cell.style.backgroundColor = 'black';
+          }
+
+          cell.addEventListener('mousemove', () => {
+            if (mouseDown) {
+              if (clear) {
+                cell.style.backgroundColor = '';
+                map[subscript(x, y)] = 0;
+              } else {
+                cell.style.backgroundColor = 'black';
+                map[subscript(x, y)] = 1;
+              }
+            }
+          });
+
+          container.appendChild(cell);
+        }
+      }
+
+      let mouseDown = false;
+      let clear = false;
+      document.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        clear = e.button === 2;
+      });
+      document.addEventListener('mouseup', () => (mouseDown = false));
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+    </script>
+  </body>
+</html>
