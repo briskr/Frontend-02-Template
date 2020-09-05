@@ -1,0 +1,42 @@
+<script>
+  const regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g;
+  const dict = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-'];
+
+  function* tokenize(source) {
+    let result = null;
+    let lastIndex = 0;
+    while (true) {
+      lastIndex = regexp.lastIndex;
+      result = regexp.exec(source);
+
+      // 无匹配
+      if (!result) break;
+
+      // 有匹配，但含有未能识别的内容，导致 regexp 前进的长度大于 capture 的长度
+      if (regexp.lastIndex - lastIndex > result[0].length) break;
+
+      const token = {
+        type: null,
+        value: null,
+      };
+
+      for (let i = 1; i <= dict.length; i++) {
+        if (result[i]) token.type = dict[i - 1];
+      }
+      token.value = result[0];
+      yield token;
+    }
+    yield {
+      type: 'EOF',
+    };
+  }
+
+  let source = [];
+
+  for (let token of tokenize('2046* 3 - 12 / 4')) {
+    console.log(JSON.stringify(token));
+    if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
+      source.push(token);
+    }
+  }
+</script>
