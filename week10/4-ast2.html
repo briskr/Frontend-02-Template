@@ -39,7 +39,19 @@
     }
   }
 
-  function Expression(source) {}
+  function Expression(source) {
+    if (source[0].type === 'AdditiveExpression') {
+      const node = {
+        type: 'Expression',
+        children: [source.shift(), source.shift()],
+      };
+      source.unshift(node);
+      return node;
+    }
+    // 尚未归约完成，继续调用加法表达式分析
+    AdditiveExpression(source);
+    return Expression(source);
+  }
 
   function AdditiveExpression(source) {
     if (source[0].type === 'MultiplicativeExpression') {
@@ -138,6 +150,6 @@
     return MultiplicativeExpression(source);
   }
 
-  AdditiveExpression(source);
+  Expression(source);
   console.log(source);
 </script>
