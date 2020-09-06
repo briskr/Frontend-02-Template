@@ -1,0 +1,143 @@
+<script>
+  const regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g;
+  const dict = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-'];
+
+  function* tokenize(source) {
+    let result = null;
+    let lastIndex = 0;
+    while (true) {
+      lastIndex = regexp.lastIndex;
+      result = regexp.exec(source);
+
+      // 无匹配
+      if (!result) break;
+
+      // 有匹配，但含有未能识别的内容，导致 regexp 前进的长度大于 capture 的长度
+      if (regexp.lastIndex - lastIndex > result[0].length) break;
+
+      const token = {
+        type: null,
+        value: null,
+      };
+
+      for (let i = 1; i <= dict.length; i++) {
+        if (result[i]) token.type = dict[i - 1];
+      }
+      token.value = result[0];
+      yield token;
+    }
+    yield {
+      type: 'EOF',
+    };
+  }
+
+  let source = [];
+
+  for (let token of tokenize('10 * 25 + 12 / 34')) {
+    if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
+      source.push(token);
+    }
+  }
+
+  function Expression(source) {}
+
+  function AdditiveExpression(source) {
+    if (source[0].type === 'MultiplicativeExpression') {
+      const node = {
+        type: 'AdditiveExpression',
+        children: [source[0]],
+      };
+      source[0] = node;
+      return AdditiveExpression(source);
+    }
+
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '+') {
+      const node = {
+        type: 'AdditiveExpression',
+        operator: source[1].type,
+        children: [],
+      };
+      // 把组成此条语法规则的 token 收入一个语法节点，用该语法节点替换这些 token
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      MultiplicativeExpression(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpression(source);
+    }
+
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '-') {
+      const node = {
+        type: 'AdditiveExpression',
+        operator: source[1].type,
+        children: [],
+      };
+      // 把组成此条语法规则的 token 收入一个语法节点，用该语法节点替换这些 token
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      MultiplicativeExpression(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpression(source);
+    }
+
+    // 首个元素是 AdditiveExpression ，且后续不是 +- 号，递归结束
+    if (source[0].type === 'AdditiveExpression') {
+      return source[0];
+    }
+
+    // 遇到其他 token ，尝试分析乘法表达式，再恢复分析加法表达式
+    MultiplicativeExpression(source);
+    return AdditiveExpression(source);
+  }
+
+  function MultiplicativeExpression(source) {
+    if (source[0].type === 'Number') {
+      const node = {
+        type: 'MultiplicativeExpression',
+        children: [source[0]],
+      };
+      source[0] = node;
+      return MultiplicativeExpression(source);
+    }
+
+    if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '*') {
+      const node = {
+        type: 'MultiplicativeExpression',
+        operator: '*',
+        children: [],
+      };
+      // 把组成此条语法规则的 token 收入一个语法节点，用该语法节点替换这些 token
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      source.unshift(node);
+      return MultiplicativeExpression(source);
+    }
+
+    if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '/') {
+      const node = {
+        type: 'MultiplicativeExpression',
+        operator: '/',
+        children: [],
+      };
+      // 把组成此条语法规则的 token 收入一个语法节点，用该语法节点替换这些 token
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      source.unshift(node);
+      return MultiplicativeExpression(source);
+    }
+
+    // 已经完成一个 MultiplicativeExpression ，递归结束
+    if (source[0].type === 'MultiplicativeExpression') {
+      return source[0];
+    }
+
+    // 不应出现的情况
+    return MultiplicativeExpression(source);
+  }
+
+  AdditiveExpression(source);
+  console.log(source);
+</script>
