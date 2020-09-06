@@ -7,23 +7,26 @@
     let table = new Array(pattern.length).fill(0);
 
     {
-      let i = 1; // 自重复串开始位置
+      let i = 1; // 自重复串开始位置 (首字符对应值一定是0，跳过不处理)
       let j = 0; // 已重复的字符数量
 
       // abcdabce
-      // aabaaac
 
       while (i < pattern.length) {
         if (pattern[i] === pattern[j]) {
+          // j指向的字符与i指向的重复
           ++i;
           ++j;
           table[i] = j;
         } else {
-          // 不是直接放弃，j = 0
           if (j > 0) {
+            // 此处 j > 0 表示已有 j 个字符重复
+            // 不是直接放弃，让 j = 0
+            // 而是从 table 中查找是否已存在 j 位置的跳转位置
+            // 例子: aabaaac 中 i == 5, j == 2 时匹配失败, 此时取已有的 table[2] == 2
             j = table[j];
           } else {
-            // j == 0
+            // 此处 j == 0
             //table[i] = j;
             ++i;
           }
