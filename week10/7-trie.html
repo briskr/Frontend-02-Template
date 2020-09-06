@@ -1,0 +1,54 @@
+<script>
+  const $ = Symbol('$');
+  class Trie {
+    constructor() {
+      this.root = Object.create(null);
+    }
+
+    insert(word) {
+      let node = this.root;
+      for (const c of word) {
+        if (!node[c]) {
+          node[c] = Object.create(null);
+        }
+        // 移动指针到末尾
+        node = node[c];
+      }
+      if (!($ in node)) {
+        node[$] = 0;
+      }
+      node[$]++;
+    }
+
+    most() {
+      let max = 0;
+      let maxWord = null;
+      const visit = (node, word) => {
+        if (node[$] && node[$] > max) {
+          max = node[$];
+          maxWord = word;
+        }
+        // 递归记录每个分支的最大长度
+        for (const p in node) {
+          visit(node[p], word + p);
+        }
+      };
+      visit(this.root, '');
+      console.log(maxWord, max);
+    }
+  }
+
+  function randomWord(length) {
+    let s = '';
+    for (let i = 0; i < length; i++) {
+      s += String.fromCharCode(Math.random() * 26 + 'a'.charCodeAt(0));
+    }
+    return s;
+  }
+
+  let trie = new Trie();
+  for (let i = 0; i < 100000; i++) {
+    trie.insert(randomWord(4));
+  }
+  console.log(trie);
+</script>
