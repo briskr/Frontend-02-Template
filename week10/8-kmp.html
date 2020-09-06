@@ -1,0 +1,73 @@
+<script>
+  /** 查找子串 */
+  function kmp(source, pattern) {
+    console.log(`kmp( source: '${source}', pattern: '${pattern}' )`);
+
+    // 计算回退表
+    let table = new Array(pattern.length).fill(0);
+
+    {
+      let i = 1; // 自重复串开始位置
+      let j = 0; // 已重复的字符数量
+
+      // abcdabce
+      // aabaaac
+
+      while (i < pattern.length) {
+        if (pattern[i] === pattern[j]) {
+          ++i;
+          ++j;
+          table[i] = j;
+        } else {
+          // 不是直接放弃，j = 0
+          if (j > 0) {
+            j = table[j];
+          } else {
+            // j == 0
+            //table[i] = j;
+            ++i;
+          }
+        }
+      }
+      console.log(table);
+    }
+
+    // 参照 table 实现匹配
+    {
+      let i = 0; // source 当前位置
+      let j = 0; // pattern 当前位置
+
+      while (i < source.length) {
+        if (pattern[j] === source[i]) {
+          // 当前字符匹配成功，指针前进
+          ++i;
+          ++j;
+        } else {
+          // 当前字符不匹配，从 table 中查出回退到的位置
+          if (j > 0) {
+            j = table[j];
+          } else {
+            // j == 0, 从 source 下一字符起继续尝试
+            ++i;
+          }
+        }
+
+        // pattern 内容已匹配完成, 跳过 source 剩余部分
+        if (j === pattern.length) return true;
+      }
+      // source 内容用完，但 pattern 内容没用完，匹配失败
+      return false;
+    }
+  }
+
+  // 验证回退表构建
+  kmp('', 'abcdabce');
+  kmp('', 'abababc');
+  kmp('', 'aabaaac');
+
+  // 验证匹配
+  console.log(kmp('hello', 'll'));
+  console.log(kmp('abcdabcdabcex', 'abcdabce'));
+  console.log(kmp('aabaabaaacx', 'aabaaac'));
+  console.log(kmp('aabaaac', 'aabaaac'));
+</script>

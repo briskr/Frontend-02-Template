@@ -1,0 +1,73 @@
+<script>
+  /**
+   * wildcard 匹配
+   * pattern 要求与 source 头尾一致，非子串匹配
+   */
+  function find(source, pattern) {
+    console.log(`find( source: '${source}', pattern: '${pattern}' )`);
+
+    // 计算*个数
+    let starCount = 0;
+    for (let i = 0; i < pattern.length; i++) {
+      if (pattern[i] === '*') {
+        starCount++;
+      }
+    }
+    // 特殊情况：pattern中无*，则要求除?外完全匹配
+    if (starCount === 0) {
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i] !== source[i] && pattern[i] !== '?') return false;
+      }
+      return true;
+    }
+
+    let i = 0; // pattern 当前位置
+    let lastIndex = 0; // source 当前位置
+
+    // 遇到第一个*之前的部分要求完全匹配，否则跳出
+    for (i = 0; pattern[i] !== '*'; i++) {
+      if (pattern[i] !== source[i] && pattern[i] !== '?') return false;
+    }
+    lastIndex = i; // *的位置
+
+    // 依次处理pattern中每两个星号之间的部分
+    for (let p = 0; p < starCount - 1; p++) {
+      i++; // 跳过当前*
+      // 取得pattern中下一个*之前的内容
+      let subPattern = '';
+      while (pattern[i] !== '*') {
+        subPattern += pattern[i];
+        i++;
+      }
+
+      // [\s\S]表示任意字符
+      let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g');
+      // 指定source中开始执行匹配的位置
+      reg.lastIndex = lastIndex;
+
+      const result = reg.exec(source);
+      console.log(result);
+
+      if (!result) return false;
+
+      lastIndex = reg.lastIndex;
+    }
+
+    // 处理pattern中最后一个星号之后的部分
+    // 从末尾向前反序比对
+    for (let j = 1; j <= source.length - lastIndex && pattern[pattern.length - j] !== '*'; j++) {
+      if (pattern[pattern.length - j] !== source[source.length - j] && pattern[pattern.length - j] !== '?') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  //console.log(find('abcdef', 'ab*d*f'));
+  //console.log(find('abcdef', 'ab*d?f'));
+
+  //console.log(find('abcabcabxaac', 'a*b*bx*c'));
+  //console.log(find('abcabcabxaac', 'a*b?*b?x*c'));
+  console.log(find('abcabcabxaac', 'a*b?*bx*c'));
+</script>
