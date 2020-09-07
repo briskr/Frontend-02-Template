@@ -1,16 +1,20 @@
 <script>
-  const object = {
-    a: 1,
-    b: 2,
-  };
-
-  const po = reactive(object);
+  // definition
+  const callbacks = [];
+  function effect(callback) {
+    callbacks.push(callback);
+  }
 
   function reactive(object) {
     return new Proxy(object, {
       set(obj, prop, val) {
         console.log('set', obj, prop, val);
-        Reflect.set(obj, prop, val);
+        obj[prop] = val;
+        // 变更对象时，通知对应的 effect
+        // 只为通过测试的最粗糙实现
+        for (const cb of callbacks) {
+          cb();
+        }
       },
       get(obj, prop) {
         console.log('get', obj, prop);
@@ -18,4 +22,25 @@
       },
     });
   }
+
+  // usage
+  const object = {
+    a: 1,
+    b: 2,
+  };
+  const po = reactive(object);
+
+  effect(() => {
+    console.log('in effect of po.a');
+    console.log('after read po.a:', po.a);
+  });
+
+  /* 
+  > po.a = 'x'
+  set {a: 1, b: 2} a x
+  in effect of po.a
+  get {a: "x", b: 2} a
+  after read po.a: x
+  <- "x"
+ */
 </script>
