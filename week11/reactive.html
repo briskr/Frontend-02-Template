@@ -1,8 +1,26 @@
 <script>
   // definition
-  const callbacks = [];
+  const callbacks = new Map();
+
+  const usedReactivities = [];
+
   function effect(callback) {
-    callbacks.push(callback);
+    //callbacks.push(callback);
+    // 调用一次callback，以便收集其引发的get行为
+    usedReactivities.splice();
+    callback();
+    console.log('usedReactivities', usedReactivities);
+
+    for (const react of usedReactivities) {
+      // callbacks 分别以 obj 和 prop 作为两级索引，对每个被访问过的对象的每个被访问过的属性构造一个数组，保存此次调用 effect 传入的 callback
+      if (!callbacks.has(react[0])) {
+        callbacks.set(react[0], new Map());
+      }
+      if (!callbacks.get(react[0]).has(react[1])) {
+        callbacks.get(react[0]).set(react[1], []);
+      }
+      callbacks.get(react[0]).get(react[1]).push(callback);
+    }
   }
 
   function reactive(object) {
@@ -11,13 +29,16 @@
         console.log('set', obj, prop, val);
         obj[prop] = val;
         // 变更对象时，通知对应的 effect
-        // 只为通过测试的最粗糙实现
-        for (const cb of callbacks) {
-          cb();
+        if (!callbacks.has(obj)) return;
+        const cbArray = callbacks.get(obj).get(prop);
+        if (cbArray) {
+          for (cb of cbArray) {
+            cb();
+          }
         }
       },
       get(obj, prop) {
-        console.log('get', obj, prop);
+        usedReactivities.push([obj, prop]);
         return obj[prop];
       },
     });
@@ -36,11 +57,21 @@
   });
 
   /* 
-  > po.a = 'x'
+ in effect of po.a
+ after read po.a: 1
+ usedReactivities [Array(2)]  # 内容是 [obj, 'a']
+
+# a 属性赋值触发了 effect callback
+> po.a = 'x'
   set {a: 1, b: 2} a x
   in effect of po.a
-  get {a: "x", b: 2} a
   after read po.a: x
-  <- "x"
+<-"x"
+
+# b 属性赋值没有触发 effect callback
+> po.b = 3
+  set {a: "x", b: 2} b 3
+<-3
+
  */
 </script>
