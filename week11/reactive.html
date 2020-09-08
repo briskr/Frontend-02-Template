@@ -1,9 +1,17 @@
 <script>
   // definition
+
+  // callback 与其依赖的对象属性的关联表
+  // { obj1 -> { prop1: [cb1-1,...], prop2: [cb1-2] }, obj2 -> { ... } }
   const callbacks = new Map();
 
+  // 缓存 reactive() 调用产生的各层 proxy 对象
+  const reactivities = new Map();
+
+  // 用于在测试调用 callback 期间，捕获发生过的 get 操作
   const usedReactivities = [];
 
+  /** 用于注册一个回调函数，接收 reactive 对象属性值变更通知 */
   function effect(callback) {
     //callbacks.push(callback);
     // 调用一次callback，以便收集其引发的get行为
@@ -24,30 +32,39 @@
   }
 
   function reactive(object) {
-    return new Proxy(object, {
+    if (reactivities.has(object)) {
+      return reactivities.get(object);
+    }
+
+    const po = new Proxy(object, {
       set(obj, prop, val) {
         console.log('set', obj, prop, val);
         obj[prop] = val;
-        // 变更对象时，通知对应的 effect
+        // 变更对象属性值时，通知对应的 effect
         if (!callbacks.has(obj)) return;
         const cbArray = callbacks.get(obj).get(prop);
         if (cbArray) {
-          for (cb of cbArray) {
+          for (const cb of cbArray) {
             cb();
           }
         }
+        return obj[prop];
       },
       get(obj, prop) {
         usedReactivities.push([obj, prop]);
+        if (typeof obj[prop] === 'object') return reactive(obj[prop]);
         return obj[prop];
       },
     });
+    reactivities.set(object, po);
+    return po;
   }
 
   // usage
   const object = {
-    a: 1,
+    a: { b: 1 },
     b: 2,
+    c: 3,
   };
   const po = reactive(object);
 
@@ -56,22 +73,33 @@
     console.log('after read po.a:', po.a);
   });
 
+  effect(() => {
+    console.log('in effect of po.a.b');
+    console.log('after read po.a.b:', po.a.b);
+  });
+
+  /*   effect(() => {
+    console.log('in effect of po.b');
+    console.log('after read po.b:', po.b);
+  });
+ */
+
   /* 
- in effect of po.a
- after read po.a: 1
- usedReactivities [Array(2)]  # 内容是 [obj, 'a']
-
-# a 属性赋值触发了 effect callback
-> po.a = 'x'
-  set {a: 1, b: 2} a x
+  # 初始构建
   in effect of po.a
-  after read po.a: x
-<-"x"
+  after read po.a: Proxy {b: 1}
+  usedReactivities [Array(2)]
 
-# b 属性赋值没有触发 effect callback
-> po.b = 3
-  set {a: "x", b: 2} b 3
-<-3
+  in effect of po.a.b
+  after read po.a.b: 1
+  usedReactivities (3) [Array(2), Array(2), Array(2)]
+
+  # set 次级对象的属性值，触发对应的 effect callback
+> po.a.b = 4
+  set {b: 1} b 4
+  in effect of po.a.b
+  after read po.a.b: 4
+<-4
 
  */
 </script>
