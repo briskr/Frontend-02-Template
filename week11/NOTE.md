@@ -19,5 +19,15 @@
     - 在 get 处遇到 `obj[prop]` 的值是对象，则对该对象进行一次 `reactive()` 包装
     - 上一步产生的新的 proxy 包装对象需要保留在内存中，以便后续访问次级对象时，能够触发包装了次级对象的 proxy 对象，因此引入 reactivities Map。
   - [代码](reactive.html)
-  - 应用以上 reactive 库 + DOM 事件监听，实现控件与数据的双向绑定
-    - [代码](reactive-bind.html)
+
+- 应用以上 reactive 库 + DOM 事件监听，实现控件与数据的双向绑定
+  - [代码](reactive-bind.html)
+
+## 用 Range 对 DOM 进行精确操作
+
+- 实现基本拖拽
+  - 在 mousedown 事件响应函数体当中才开始启用 mousemove 和 mouseup 监听
+  - mouseup 响应函数体当中把 move 和 自身 从 document 的事件响应函数中移除
+  - mousemove 响应函数体：把元素 translate 到 (mousemove 事件位置) 与 (mousedown 位置) 之差
+  - 多次发生拖动动作，起始时元素位置已包含上次拖动后的偏移量
+    - 解决办法：在 mouseup 时记录本次拖拽结束的位置，下次拖动时 translate 参数改为 (上次结束位置 + (mousemove 事件位置 - mousedown 位置) )
