@@ -2,14 +2,15 @@
 
 <script>
   const draggable = document.getElementById('draggable');
+  // 记录上一次结束拖拽时的基准坐标
   let baseX = 0, baseY = 0;
 
   draggable.addEventListener('mousedown', (event) => {
-    // 记录 mousedown 的起始点
+    // 记录 mousedown 事件坐标，即本次拖拽的起始点
     const startX = event.clientX, startY = event.clientY;
 
     const up = (event) => {
-      // 把 base 点移动到本次松开鼠标时的位置
+      // 结束拖拽，把 base 点移动到本次松开鼠标时的位置
       baseX = baseX + event.clientX - startX;
       baseY = baseY + event.clientY - startY;
       document.removeEventListener('mousemove', move);

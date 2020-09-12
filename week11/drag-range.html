@@ -1,0 +1,69 @@
+<div id="container">文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+  文字填充 文字填充 文字填充 文字填充 文字填充
+</div>
+<div id="draggable" style="display: inline-block; width:50px; height: 50px; background-color:blanchedalmond"></div>
+
+<script type="text/javascript">
+  const draggable = document.getElementById('draggable');
+  // 记录上一次结束拖拽时的基准坐标
+  let baseX = 0, baseY = 0;
+
+  draggable.addEventListener('mousedown', (event) => {
+    // 记录 mousedown 事件坐标，即本次拖拽的起始点
+    const startX = event.clientX, startY = event.clientY;
+
+    const up = (event) => {
+      // 结束拖拽，把 base 点移动到本次松开鼠标时的位置
+      baseX = baseX + event.clientX - startX;
+      baseY = baseY + event.clientY - startY;
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+    }
+    const move = (event) => {
+      const r = getNearest(event.clientX, event.clientY);
+      if (!r) return;
+      r.insertNode(draggable);
+      //draggable.style.transform = `translate(${baseX + event.clientX - startX}px, ${baseY + event.clientY - startY}px)`;
+    }
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  })
+
+  function getNearest(x, y) {
+    let min = Infinity;
+    let nearest = null;
+
+    for (const range of ranges) {
+      let rect = range.getBoundingClientRect();
+      let distance = (rect.x - x) ** 2 + (rect.y - y) ** 2;
+      if (distance < min) {
+        min = distance;
+        nearest = range;
+      }
+    }
+    return nearest;
+  }
+
+  const ranges = [];
+  const container = document.getElementById('container');
+  for (let i = 0; i <= container.childNodes[0].textContent.length; i++) {
+    // 视频中上面一行是 i < ，改为 <=，段落末尾也可以加插入点，共 length + 1 个
+    const range = document.createRange();
+    range.setStart(container.childNodes[0], i);
+    range.setEnd(container.childNodes[0], i);
+
+    //console.log(range.getBoundingClientRect());
+    ranges.push(range);
+  }
+  document.addEventListener('selectstart', (event) => event.preventDefault());
+
+</script>

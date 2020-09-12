@@ -21,13 +21,23 @@
   - [代码](reactive.html)
 
 - 应用以上 reactive 库 + DOM 事件监听，实现控件与数据的双向绑定
+  - 添加 effect 动作，实现 reactive 对象数据变更时通知 DOM
+  - 添加 DOM 元素事件监听，实现 DOM 对象内容变更时更新 reactive 对象
   - [代码](reactive-bind.html)
 
 ## 用 Range 对 DOM 进行精确操作
 
 - 实现基本拖拽
   - 在 mousedown 事件响应函数体当中才开始启用 mousemove 和 mouseup 监听
-  - mouseup 响应函数体当中把 move 和 自身 从 document 的事件响应函数中移除
-  - mousemove 响应函数体：把元素 translate 到 (mousemove 事件位置) 与 (mousedown 位置) 之差
-  - 多次发生拖动动作，起始时元素位置已包含上次拖动后的偏移量
-    - 解决办法：在 mouseup 时记录本次拖拽结束的位置，下次拖动时 translate 参数改为 (上次结束位置 + (mousemove 事件位置 - mousedown 位置) )
+  - mouseup 响应函数体：负责把 move 和 自身 两个事件响应函数从 document 的事件响应函数中移除
+  - mousedown 响应函数中记录事件坐标，即此次拖拽动作的起始位置坐标
+  - mousemove 响应函数体：把元素 translate 到 (mousemove 事件坐标) 与 (mousedown 事件坐标) 之差
+  - 多次发生拖动动作，起始时元素的 translate 值已包含上次拖动后的偏移量，造成被拖动元素脱离鼠标位置
+    - 解决办法：在 mouseup 时记录本次拖拽结束的位置(放在事件响应函数作用域外，在多次拖动之间保留值)，下次拖动时 translate 参数改为 (上次结束位置 + (mousemove 事件位置 - mousedown 位置) )
+  - [代码](drag-transform.html)
+
+- 实现拖拽元素进入段落内部
+  - 列举段落内可以插入元素的位置 - 在段落头尾和每个字符之间创建 Range
+  - 应用 CSSOM 的 getBoundingRect() 取到各 Range **当前渲染位置** 对应的矩形 - 坐标在两个字符实际排版位置之间，宽度为0
+  - move 事件响应函数中，计算与目标位置距离最近的 Range，调用 range.insertNode() 把拖动中的元素移入
+  - [代码](drag-range.html)
