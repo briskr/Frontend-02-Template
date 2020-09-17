@@ -1,24 +1,70 @@
-function createElement(tag, attrs, ...children) {
-  const elem = document.createElement(tag);
-  for (const key in attrs) {
-    elem.setAttribute(key, attrs[key]);
+function createElement(type, attrs, ...children) {
+  let elem;
+  if (typeof type === 'string') {
+    elem = new ElementWrapper(type);
+  } else {
+    elem = new type();
+  }
+
+  for (const name in attrs) {
+    elem.setAttribute(name, attrs[name]);
   }
   for (const child of children) {
-    /* if (typeof child === 'string') {
-      child = document.createTextNode(child);
+    if (typeof child === 'string') {
+      child = new TextNodeWrapper(child);
     }
-    elem.appendChild(child); */
-    // append 方法可接受 DOMString 或 Node
-    elem.append(child);
+    elem.appendChild(child);
   }
   return elem;
 }
 
+class TextNodeWrapper {
+  constructor(text) {
+    this.root = document.createTextNode(text);
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
+  // appendChild() {}
+  // setAttribute() {}
+}
+
+class ElementWrapper {
+  constructor(type) {
+    this.root = document.createElement(type);
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
+  appendChild(child) {
+    child.mountTo(this.root);
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value);
+  }
+}
+
+class Div {
+  constructor() {
+    this.root = document.createElement('div');
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
+  appendChild(child) {
+    child.mountTo(this.root);
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value);
+  }
+}
+
 let a = (
-  <div class="cls1">
+  <Div class="cls1">
     text<span>label1</span>
     <span>label2</span>
-  </div>
+  </Div>
 );
 
-document.body.appendChild(a);
+//document.body.appendChild(a);
+a.mountTo(document.body);
