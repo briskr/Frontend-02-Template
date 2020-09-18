@@ -19,9 +19,7 @@ export function createElement(type, attrs, ...children) {
 }
 
 export class Component {
-  constructor() {
-    this.root = this.render();
-  }
+  constructor() {}
   mountTo(parent) {
     parent.appendChild(this.root);
   }

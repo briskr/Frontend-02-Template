@@ -3,9 +3,17 @@ import { Component, createElement } from './framework.js';
 class Carousel extends Component {
   constructor() {
     super();
+    this.attributes = Object.create(null);
+  }
+  setAttribute(name, value) {
+    this.attributes[name] = value;
   }
   render() {
+    console.debug('render', this.attributes.src);
     return document.createElement('div');
+  }
+  mountTo(parent) {
+    parent.appendChild(this.render());
   }
 }
 
@@ -16,5 +24,5 @@ let d = [
   'https://static001.geekbang.org/resource/image/73/e4/730ea9c393def7975deceb48b3eb6fe4.jpg',
 ];
 
-let a = <Carousel></Carousel>;
+let a = <Carousel src={d}></Carousel>;
 a.mountTo(document.body);
