@@ -1,70 +1,20 @@
-function createElement(type, attrs, ...children) {
-  let elem;
-  if (typeof type === 'string') {
-    elem = new ElementWrapper(type);
-  } else {
-    elem = new type();
-  }
+import { Component, createElement } from './framework.js';
 
-  for (const name in attrs) {
-    elem.setAttribute(name, attrs[name]);
-  }
-  for (const child of children) {
-    if (typeof child === 'string') {
-      child = new TextNodeWrapper(child);
-    }
-    elem.appendChild(child);
-  }
-  return elem;
-}
-
-class TextNodeWrapper {
-  constructor(text) {
-    this.root = document.createTextNode(text);
-  }
-  mountTo(parent) {
-    parent.appendChild(this.root);
-  }
-  // appendChild() {}
-  // setAttribute() {}
-}
-
-class ElementWrapper {
-  constructor(type) {
-    this.root = document.createElement(type);
-  }
-  mountTo(parent) {
-    parent.appendChild(this.root);
-  }
-  appendChild(child) {
-    child.mountTo(this.root);
-  }
-  setAttribute(name, value) {
-    this.root.setAttribute(name, value);
-  }
-}
-
-class Div {
+class Carousel extends Component {
   constructor() {
-    this.root = document.createElement('div');
+    super();
   }
-  mountTo(parent) {
-    parent.appendChild(this.root);
-  }
-  appendChild(child) {
-    child.mountTo(this.root);
-  }
-  setAttribute(name, value) {
-    this.root.setAttribute(name, value);
+  render() {
+    return document.createElement('div');
   }
 }
 
-let a = (
-  <Div class="cls1">
-    text<span>label1</span>
-    <span>label2</span>
-  </Div>
-);
+let d = [
+  'https://static001.geekbang.org/resource/image/bb/21/bb38fb7c1073eaee1755f81131f11d21.jpg',
+  'https://static001.geekbang.org/resource/image/1b/21/1b809d9a2bdf3ecc481322d7c9223c21.jpg',
+  'https://static001.geekbang.org/resource/image/b6/4f/b6d65b2f12646a9fd6b8cb2b020d754f.jpg',
+  'https://static001.geekbang.org/resource/image/73/e4/730ea9c393def7975deceb48b3eb6fe4.jpg',
+];
 
-//document.body.appendChild(a);
+let a = <Carousel></Carousel>;
 a.mountTo(document.body);
