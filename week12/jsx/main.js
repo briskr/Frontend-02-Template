@@ -9,8 +9,13 @@ class Carousel extends Component {
     this.attributes[name] = value;
   }
   render() {
-    console.debug('render', this.attributes.src);
-    return document.createElement('div');
+    this.root = document.createElement('div');
+    for (const url of this.attributes.src) {
+      const child = document.createElement('img');
+      child.src = url;
+      this.root.appendChild(child);
+    }
+    return this.root;
   }
   mountTo(parent) {
     parent.appendChild(this.render());
