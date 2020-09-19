@@ -21,7 +21,7 @@
     - attribute - 用法是通过 markup 向组件传入信息，区别于通过对象的 property / method 读写信息
     - config (构造参数) & state (运行期间状态)
     - event - 向组件使用者传递信息
-    - lifecycle
+    - lifecycle - 组件的创建、销毁、状态变化等节点
     - children - 组成树形结构
 
   - attribute vs. property
@@ -79,6 +79,7 @@
     - create, destroy
     - mount, mounted, unmounted
     - 用户操作或属性设置触发 - update
+    - 可以作为扩展点，提供给应用程序代码添加生命期节点上的处理逻辑
 
   - children 组件树形结构
     - content - 实际子节点数量与代码中一致
