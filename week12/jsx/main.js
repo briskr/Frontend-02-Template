@@ -18,33 +18,51 @@ class Carousel extends Component {
     }
 
     // 图片宽度
-    const imgw = 640;
+    const imgw = 571;
     // 当前视口显示的图片的下标
     let position = 0;
     this.root.addEventListener('mousedown', (event) => {
+      const children = this.root.children;
       const startX = event.clientX;
 
       const move = (event) => {
-        // 拖拽释放前，更新图片偏移量，让图片跟随鼠标移动
         const x = event.clientX - startX;
-        for (const child of this.root.children) {
-          child.style.transition = 'none';
-          child.style.transform = `translateX(${-position * imgw + x}px)`;
+        // 找出当前视口中占多数面积的图片的下标
+        let current = position - (x - (x % imgw)) / imgw;
+        //console.debug('in mousemove, current', current);
+        // 找出主体图片的前一帧和后一帧，移动到前后相邻的位置
+        for (const offset of [-1, 0, 1]) {
+          // pos: 本轮循环被移动的帧的下标
+          // 考虑到 current + offset 可能为负，加上 length 再取余，以保证 pos 落在下标允许范围内
+          const pos = (current + offset + children.length) % children.length;
+          // 调试中遇到持续 current 变小到 -4 ，造成 pos == -1
+          //if (current > 2 || current < -3) debugger;
+          // if (pos < 0 || pos >= children.length) {
+          //   console.error('pos', pos);
+          //   pos += children.length;
+          // }
+          children[pos].style.transition = 'none';
+          children[pos].style.transform = `translateX(${(-pos + offset) * imgw + (x % imgw)}px)`;
         }
       };
+
       const up = (event) => {
         // 拖拽结束时，若向左拖动距离(x为负)超过图片宽度的一半，则 position 加一；向右拖动过半则 position 减一
         const x = event.clientX - startX;
-        position = position - Math.round(x / imgw);
-        //console.debug('mouseup, x:', x, 'position', position);
-        for (const child of this.root.children) {
-          // 移动图片到 position 决定的位置
-          child.style.transition = '';
-          child.style.transform = `translateX(${-position * imgw}px)`;
+        position = (position - Math.round(x / imgw)) % children.length;
+        // 上一行代码增加 % 运算，否则每次拖拽后连续增长或减小，减小到 -4 后会造成下次 mousemove 计算出来的 current 变负，取图片失败
+        //console.debug('in mouseup, position', position);
+
+        // 移动下标为 position 的图片，及 move 期间被局部露出的图片
+        for (const offset of [0, Math.sign(x - (Math.sign(x) * imgw) / 2 - Math.round(x / imgw))]) {
+          const pos = (position + offset + children.length) % children.length;
+          children[pos].style.transition = '';
+          children[pos].style.transform = `translateX(${(-pos + offset) * imgw}px)`;
         }
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', up);
       };
+
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
     });
