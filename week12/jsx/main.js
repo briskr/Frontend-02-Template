@@ -17,14 +17,31 @@ class Carousel extends Component {
       this.root.appendChild(child);
     }
 
+    // 图片宽度
+    const imgw = 640;
+    // 当前视口显示的图片的下标
+    let position = 0;
     this.root.addEventListener('mousedown', (event) => {
-      console.debug('mousedown');
+      const startX = event.clientX;
 
       const move = (event) => {
-        console.debug('mousemove');
+        // 拖拽释放前，更新图片偏移量，让图片跟随鼠标移动
+        const x = event.clientX - startX;
+        for (const child of this.root.children) {
+          child.style.transition = 'none';
+          child.style.transform = `translateX(${-position * imgw + x}px)`;
+        }
       };
       const up = (event) => {
-        console.debug('mouseup');
+        // 拖拽结束时，若向左拖动距离(x为负)超过图片宽度的一半，则 position 加一；向右拖动过半则 position 减一
+        const x = event.clientX - startX;
+        position = position - Math.round(x / imgw);
+        //console.debug('mouseup, x:', x, 'position', position);
+        for (const child of this.root.children) {
+          // 移动图片到 position 决定的位置
+          child.style.transition = '';
+          child.style.transform = `translateX(${-position * imgw}px)`;
+        }
         document.removeEventListener('mousemove', move);
         document.removeEventListener('mouseup', up);
       };
