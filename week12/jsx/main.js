@@ -17,6 +17,21 @@ class Carousel extends Component {
       this.root.appendChild(child);
     }
 
+    this.root.addEventListener('mousedown', (event) => {
+      console.debug('mousedown');
+
+      const move = (event) => {
+        console.debug('mousemove');
+      };
+      const up = (event) => {
+        console.debug('mouseup');
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+      };
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+    /* 
     let currentIndex = 0;
     setInterval(() => {
       // nextIndex 的值可以表示平移后的位置应当向左偏移几个 100%, 按 1, 2, 3, 0, 1,... 循环变化
@@ -40,9 +55,9 @@ class Carousel extends Component {
         nextElm.style.transform = `translateX(${-nextIndex * 100}%)`;
 
         currentIndex = nextIndex;
-      }, 16 /* 大致是浏览器动画帧间隔时间，未采用 requestAnimationFrame 实现，课内未详细分析，只提到那样会需要两次 RAF 动作 */);
+      }, 16 // 大致是浏览器动画帧间隔时间，未采用 requestAnimationFrame 实现，课内未详细分析，只提到那样会需要两次 RAF 动作);
     }, 3000);
-
+    */
     return this.root;
   }
   mountTo(parent) {
