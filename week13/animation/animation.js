@@ -1,7 +1,12 @@
 const TICK = Symbol('tick');
 const TICK_HANDLE = Symbol('tick-handle');
+
+/** 现有的被 Timeline 驱动的 anim 对象集合 */
 const ANIMATIONS = Symbol('animations');
+
+/** 记录每个 anim 对象被 add 的时间 */
 const START_TIME = Symbol('start-time');
+
 const PAUSE_START = Symbol('pause-start');
 const PAUSE_TIME = Symbol('pause-time');
 
@@ -23,10 +28,13 @@ export class Timeline {
   start() {
     const startTime = Date.now();
     this[PAUSE_TIME] = 0;
+
     this[TICK] = () => {
       const now = Date.now();
       for (const anim of this[ANIMATIONS]) {
         let t;
+
+        // 调用 start() 之前已 tl.add(anim) 添加进来, 则从 start() 调用开始运行; start() 之后才 add() 的 anim 从 add 的时刻开始执行
         if (this[START_TIME].get(anim) < startTime) {
           t = now - startTime - this[PAUSE_TIME] - anim.delay;
         } else {
@@ -48,6 +56,7 @@ export class Timeline {
   pause() {
     this[PAUSE_START] = Date.now();
     cancelAnimationFrame(this[TICK_HANDLE]);
+    this[TICK_HANDLE] = null;
   }
   /** 暂停后继续运行动画 */
   resume() {
@@ -55,15 +64,23 @@ export class Timeline {
     this[TICK]();
   }
 
-  /** 重启时间线 */
-  reset() {}
+  /** 重置: 清空已加入的 anim 对象, 仍保持已 start 的状态, 可以重新 add() */
+  reset() {
+    this.pause();
+    this[PAUSE_START] = 0;
 
-  add(animation, startTime) {
+    //const startTime = Date.now(); //视频中复制了这行，实际不需要
+    this[ANIMATIONS] = new Set();
+    this[START_TIME] = new Map();
+    this[PAUSE_TIME] = 0;
+  }
+
+  add(anim, startTime) {
     if (arguments.length < 2) {
       startTime = Date.now();
     }
-    this[ANIMATIONS].add(animation);
-    this[START_TIME].set(animation, startTime);
+    this[ANIMATIONS].add(anim);
+    this[START_TIME].set(anim, startTime);
   }
 }
 
