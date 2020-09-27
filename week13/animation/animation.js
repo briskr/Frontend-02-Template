@@ -76,16 +76,20 @@ export class Animation {
     this.endValue = endValue;
     this.duration = duration;
     this.delay = delay;
-    this.timingFunction = timingFunction;
-    this.template = template;
+    this.timingFunction = timingFunction || ((v) => v);
+    this.template = template || ((v) => v);
   }
+  /**
+   * 根据从启动动画时刻算起，已流逝的时长，变更 this.object 的 this.property 属性值
+   */
   receiveTime(time) {
+    // 计算属性值
     const range = this.endValue - this.startValue;
-    let v = this.startValue + (range * time) / this.duration;
-    if (this.template) {
-      this.object[this.property] = this.template(v);
-    } else {
-      this.object[this.property] = v;
-    }
+    let progress = this.timingFunction(time / this.duration);
+
+    let v = this.startValue + range * progress;
+
+    // 应用计算结果值, 和套用 template
+    this.object[this.property] = this.template(v);
   }
 }
