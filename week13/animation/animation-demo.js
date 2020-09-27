@@ -14,5 +14,5 @@ const resumeBtn = document.getElementById('resume-btn');
 resumeBtn.addEventListener('click', () => tl.resume());
 
 const elem = document.getElementById('anim1');
-const a1 = new Animation(elem.style, 'transform', 0, 500, 3000, 500, null, (v) => `translateX(${v}px)`);
+const a1 = new Animation(elem.style, 'transform', 0, 500, 3000, 3000, null, (v) => `translateX(${v}px)`);
 tl.add(a1);

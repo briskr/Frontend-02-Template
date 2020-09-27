@@ -28,15 +28,15 @@ export class Timeline {
       for (const anim of this[ANIMATIONS]) {
         let t;
         if (this[START_TIME].get(anim) < startTime) {
-          t = now - startTime - this[PAUSE_TIME];
+          t = now - startTime - this[PAUSE_TIME] - anim.delay;
         } else {
-          t = now - this[START_TIME].get(anim) - this[PAUSE_TIME];
+          t = now - this[START_TIME].get(anim) - this[PAUSE_TIME] - anim.delay;
         }
         if (t > anim.duration) {
           this[ANIMATIONS].delete(anim);
           t = anim.duration;
         }
-        anim.receiveTime(t);
+        if (t > 0) anim.receiveTime(t);
       }
       this[TICK_HANDLE] = requestAnimationFrame(this[TICK]);
     };
