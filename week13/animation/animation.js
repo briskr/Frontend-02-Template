@@ -13,6 +13,7 @@ const PAUSE_TIME = Symbol('pause-time');
 /** 负责周期性调用 RAF推进时间线; 持有 Animation 对象集合, 驱动它们随时间变化更新状态 */
 export class Timeline {
   constructor() {
+    this.state = 'Init';
     this[ANIMATIONS] = new Set();
     this[START_TIME] = new Map();
   }
@@ -26,6 +27,9 @@ export class Timeline {
   }
 
   start() {
+    if (this.state !== 'Init') return;
+    this.state = 'Started';
+
     const startTime = Date.now();
     this[PAUSE_TIME] = 0;
 
@@ -54,18 +58,24 @@ export class Timeline {
 
   /** 暂停运行动画 */
   pause() {
+    if (this.state !== 'Started') return;
+    this.state = 'Paused';
     this[PAUSE_START] = Date.now();
     cancelAnimationFrame(this[TICK_HANDLE]);
     this[TICK_HANDLE] = null;
   }
   /** 暂停后继续运行动画 */
   resume() {
+    if (this.state !== 'Paused') return;
+    this.state = 'Started';
+
     this[PAUSE_TIME] += Date.now() - this[PAUSE_START];
     this[TICK]();
   }
 
   /** 重置: 清空已加入的 anim 对象, 仍保持已 start 的状态, 可以重新 add() */
   reset() {
+    this.state = 'Init';
     this.pause();
     this[PAUSE_START] = 0;
 
