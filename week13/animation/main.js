@@ -12,18 +12,18 @@ let d = [
 let a = <Carousel src={d}></Carousel>;
 a.mountTo(document.body);
 
-const a1 = new Animation(
-  {
+/* const a1 = new Animation({
     set a(v) {
       console.log(v);
     },
   },
-  'a',
-  0,
-  100,
-  1000,
-  null
+  'a', 0, 100,  500, 1000, null
 );
-const tl = new Timeline();
 tl.add(a1);
+ */
+
+const tl = new Timeline();
+window.tl = tl;
+window.Animation = Animation;
+
 tl.start();
