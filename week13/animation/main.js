@@ -1,6 +1,5 @@
 import { createElement } from './framework';
 import { Carousel } from './carousel';
-import { Timeline, Animation } from './animation';
 
 let d = [
   'https://static001.geekbang.org/resource/image/bb/21/bb38fb7c1073eaee1755f81131f11d21.jpg',
@@ -11,19 +10,3 @@ let d = [
 
 let a = <Carousel src={d}></Carousel>;
 a.mountTo(document.body);
-
-/* const a1 = new Animation({
-    set a(v) {
-      console.log(v);
-    },
-  },
-  'a', 0, 100,  500, 1000, null
-);
-tl.add(a1);
- */
-
-const tl = new Timeline();
-window.tl = tl;
-window.Animation = Animation;
-
-tl.start();
