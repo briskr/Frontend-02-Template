@@ -19,7 +19,7 @@ elem.addEventListener('mousedown', (event) => {
   // key 的取值 1,2,4,8,16 与 buttons 掩码保持一致
   const key = 'mouse' + (1 << calcButtonShift(event.button));
   contextMap.set(key, context);
-  console.log('new context', key);
+  console.debug('new context', key);
   start(event, context);
 
   const mousemove = (event) => {
@@ -40,19 +40,19 @@ elem.addEventListener('mousedown', (event) => {
     const context = contextMap.get(key);
 
     end(event, context);
-    console.log('after end, deleting', key);
+    //console.debug('after end, deleting', key);
     contextMap.delete(key);
 
     if (event.buttons === 0) {
-      elem.removeEventListener('mousemove', mousemove);
-      elem.removeEventListener('mouseup', mouseup);
+      document.removeEventListener('mousemove', mousemove);
+      document.removeEventListener('mouseup', mouseup);
       isListeningMouse = false;
     }
   };
 
   if (!isListeningMouse) {
-    elem.addEventListener('mousemove', mousemove);
-    elem.addEventListener('mouseup', mouseup);
+    document.addEventListener('mousemove', mousemove);
+    document.addEventListener('mouseup', mouseup);
     isListeningMouse = true;
   }
 });
@@ -89,7 +89,7 @@ elem.addEventListener('touchcancel', (event) => {
 });
 
 const start = (point, context) => {
-  console.log('start', point.clientX, point.clientY);
+  console.debug('start', point.clientX, point.clientY);
   (context.startX = point.clientX), (context.startY = point.clientY);
   context.isTap = true;
   context.isPan = false;
@@ -123,6 +123,7 @@ const move = (point, context) => {
 const end = (point, context) => {
   if (context.isTap) {
     console.log('tap');
+    dispatch('tap', {});
     clearTimeout(context.pressTimeoutHandle);
   }
   if (context.isPan) {
@@ -139,3 +140,12 @@ const cancel = (point, context) => {
   clearTimeout(context.pressTimeoutHandle);
   console.log('cancel', point.clientX, point.clientY);
 };
+
+/** 构造事件 */
+function dispatch(type, properties) {
+  const event = new Event(type);
+  for (const name in properties) {
+    event[name] = properties[name];
+  }
+  elem.dispatchEvent(event);
+}
