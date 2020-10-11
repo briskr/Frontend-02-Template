@@ -15,7 +15,9 @@
       - -> pan-start - 长按期间发生移动
       - -> press-end - 长按结束，离开屏幕
 
-### 鼠标和触屏拖拽事件处理代码框架
+## 鼠标和触屏拖拽事件处理代码
+
+### 初步框架
 
 - 触摸拖拽相关的原生事件
   - touchstart - 开始触摸屏幕
@@ -23,15 +25,18 @@
   - touchend - 结束拖拽离开屏幕
   - touchcancel - 被打断
 
-对鼠标拖拽和触摸拖拽统一抽象成 4 个响应函数来处理。至此对应的代码: 2ed1b80
+对鼠标拖拽和触摸拖拽统一抽象成 4 个响应函数来处理。至此对应的代码: 2ed1b80764db74c7270e632c5011ca8c9f072442
 
-- 分析事件时序，处理不同类型的动作
-  - start 后 .5s 手指未离开，则触发 pressstart
-  - 移动距离超过阈值，判定为 panstart，并取消开启 press 的 timeout
-  - 增加状态变量，在 end 事件中，若未发生 pan 或 press ，则发出 tap，且取消开启 press 的 timeout；若发生 pan 或 press 的情况，则发出对应的 end 事件
-  - 发生 cancel 事件也取消开启 press 的 timeout
+### 根据事件时序判断发生的动作
 
-至此对应的代码: bc1fcbb
+- start 后 .5s 手指未离开，则触发 pressstart
+- 移动距离超过阈值，判定为 panstart，并取消开启 press 的 timeout
+- 增加状态变量，在 end 事件中，若未发生 pan 或 press ，则发出 tap，且取消开启 press 的 timeout；若发生 pan 或 press 的情况，则发出对应的 end 事件
+- 发生 cancel 事件也取消开启 press 的 timeout
+
+至此对应的代码: bc1fcbbbe10931e59f44b2458e0608bdf1e64c43
+
+### 支持多点触摸，和鼠标多个键同时按下
 
 - 状态信息装入 context 对象
 
@@ -47,4 +52,22 @@
   - 两个以上的按键先后按下，mousedown 时需要判断是否已经添加过 move 和 up 的响应函数，避免重复添加 - 添加 isListeningMouse 变量
     - mouseup 响应时，增加判断 buttons 值，只有当所有按键都松开后才移除 move 和 up 响应函数
 
-至此对应的代码 dbd35e5
+至此对应的代码 dbd35e5d06652023e057a7573257da83f682aad7
+
+### 加入 dispatchEvent
+
+- [Event 类](https://developer.mozilla.org/en-US/docs/Web/API/Event)
+- [CustomEvent 类](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent) - 增加 detail 属性，约定用此对象传入补充信息
+
+  ```javascript
+  let event = new CustomEvent('cat', {
+    detail: {
+      hazcheeseburger: true,
+    },
+  });
+  obj.dispatchEvent(event);
+  ```
+
+- [EventTarget.dispatchEvent()](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent)
+
+至此对应的代码 cc166ef37973947e2d249cb62a1e0b11ad739c68
