@@ -1,95 +1,141 @@
 const elem = document.documentElement;
 
+let isListeningMouse = false;
+
+const contextMap = new Map();
+
 elem.addEventListener('mousedown', (event) => {
-  start(event);
+  const calcButtonShift = (button) => {
+    // mousedown 事件参数的 button 值 - 1 中键, 2 右键
+    // mousemove 事件参数的 buttons 值 - 2 右键, 4 中键,
+    let shift;
+    if (button === 2) shift = 1;
+    else if (button === 1) shift = 2;
+    else shift = button;
+    return shift;
+  };
+
+  const context = Object.create(null);
+  // key 的取值 1,2,4,8,16 与 buttons 掩码保持一致
+  const key = 'mouse' + (1 << calcButtonShift(event.button));
+  contextMap.set(key, context);
+  console.log('new context', key);
+  start(event, context);
+
   const mousemove = (event) => {
-    move(event);
+    let button = 1;
+    while (button <= event.buttons) {
+      if (event.buttons & button) {
+        const context = contextMap.get('mouse' + button);
+        move(event, context);
+      }
+      button = button << 1;
+    }
   };
+
   const mouseup = (event) => {
-    end(event);
-    elem.removeEventListener('mousemove', mousemove);
-    elem.removeEventListener('mouseup', mouseup);
+    console.debug('mouseup', event.button, calcButtonShift(event.button));
+
+    const key = 'mouse' + (1 << calcButtonShift(event.button));
+    const context = contextMap.get(key);
+
+    end(event, context);
+    console.log('after end, deleting', key);
+    contextMap.delete(key);
+
+    if (event.buttons === 0) {
+      elem.removeEventListener('mousemove', mousemove);
+      elem.removeEventListener('mouseup', mouseup);
+      isListeningMouse = false;
+    }
   };
-  elem.addEventListener('mousemove', mousemove);
-  elem.addEventListener('mouseup', mouseup);
+
+  if (!isListeningMouse) {
+    elem.addEventListener('mousemove', mousemove);
+    elem.addEventListener('mouseup', mouseup);
+    isListeningMouse = true;
+  }
 });
 
 elem.addEventListener('touchstart', (event) => {
   for (const touch of event.changedTouches) {
-    start(touch);
+    const context = Object.create(null);
+    contextMap.set(touch.identifier, context);
+    start(touch, context);
   }
 });
 
 elem.addEventListener('touchmove', (event) => {
   for (const touch of event.changedTouches) {
-    move(touch);
+    const context = contextMap.get(touch.identifier);
+    move(touch, context);
   }
 });
 
 elem.addEventListener('touchend', (event) => {
   for (const touch of event.changedTouches) {
-    end(touch);
+    const context = contextMap.get(touch.identifier);
+    end(touch, context);
+    contextMap.delete(touch.identifier);
   }
 });
 
 elem.addEventListener('touchcancel', (event) => {
   for (const touch of event.changedTouches) {
-    cancel(touch);
+    const context = contextMap.get(touch.identifier);
+    cancel(touch, context);
+    contextMap.delete(touch.identifier);
   }
 });
 
-let pressTimeoutHandle;
-let startX, startY;
-let isPan = false,
-  isTap = true,
-  isPress = false;
-
-const start = (point) => {
+const start = (point, context) => {
   console.log('start', point.clientX, point.clientY);
-  (startX = point.clientX), (startY = point.clientY);
-  isTap = true;
-  isPan = false;
-  isPress = false;
+  (context.startX = point.clientX), (context.startY = point.clientY);
+  context.isTap = true;
+  context.isPan = false;
+  context.isPress = false;
 
-  pressTimeoutHandle = setTimeout(() => {
-    isTap = false;
-    isPan = false;
-    isPress = true;
+  context.pressTimeoutHandle = setTimeout(() => {
+    context.isTap = false;
+    context.isPan = false;
+    context.isPress = true;
     console.log('press');
-    pressTimeoutHandle = null;
+    context.pressTimeoutHandle = null;
   }, 500);
 };
-const move = (point) => {
-  let dx = point.clientX - startX,
-    dy = point.clientY - startY;
-  if (!isPan && dx ** 2 + dy ** 2 > 100) {
-    isTap = false;
-    isPan = true;
-    isPress = false;
+
+const move = (point, context) => {
+  let dx = point.clientX - context.startX,
+    dy = point.clientY - context.startY;
+  if (!context.isPan && dx ** 2 + dy ** 2 > 100) {
+    context.isTap = false;
+    context.isPan = true;
+    context.isPress = false;
     console.log('panstart');
-    clearTimeout(pressTimeoutHandle);
+    clearTimeout(context.pressTimeoutHandle);
   }
-  if (isPan) {
-    console.log('panning', dx, dy);
-    console.log('pan');
+  if (context.isPan) {
+    console.log('pan', dx, dy);
   }
   //console.log('move', point.clientX, point.clientY);
 };
-const end = (point) => {
-  if (isTap) {
+
+const end = (point, context) => {
+  if (context.isTap) {
     console.log('tap');
-    clearTimeout(pressTimeoutHandle);
+    clearTimeout(context.pressTimeoutHandle);
   }
-  if (isPan) {
+  if (context.isPan) {
     console.log('panend');
   }
-  if (isPress) {
+  if (context.isPress) {
     console.log('pressend');
   }
 
   //console.log('end', point.clientX, point.clientY);
 };
-const cancel = (point) => {
-  clearTimeout(pressTimeoutHandle);
+
+const cancel = (point, context) => {
+  clearTimeout(context.pressTimeoutHandle);
   console.log('cancel', point.clientX, point.clientY);
 };
