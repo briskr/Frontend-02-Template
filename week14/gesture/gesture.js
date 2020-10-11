@@ -1,5 +1,6 @@
 const elem = document.documentElement;
 
+const flickThreshold = 1.5;
 let isListeningMouse = false;
 
 const contextMap = new Map();
@@ -91,6 +92,14 @@ elem.addEventListener('touchcancel', (event) => {
 const start = (point, context) => {
   console.debug('start', point.clientX, point.clientY);
   (context.startX = point.clientX), (context.startY = point.clientY);
+  context.points = [
+    {
+      t: Date.now(),
+      x: point.clientX,
+      y: point.clientY,
+    },
+  ];
+
   context.isTap = true;
   context.isPan = false;
   context.isPress = false;
@@ -99,7 +108,8 @@ const start = (point, context) => {
     context.isTap = false;
     context.isPan = false;
     context.isPress = true;
-    console.log('press');
+    //console.log('press');
+    dispatch('press', { point: { x: context.startX, y: context.startY } });
     context.pressTimeoutHandle = null;
   }, 500);
 };
@@ -111,34 +121,62 @@ const move = (point, context) => {
     context.isTap = false;
     context.isPan = true;
     context.isPress = false;
-    console.log('panstart');
     clearTimeout(context.pressTimeoutHandle);
   }
   if (context.isPan) {
-    console.log('pan', dx, dy);
+    //console.debug('pan', dx, dy);
+    dispatch('panstart', {});
   }
+  // 只保留最近 .5s 时间内的点
+  context.points = context.points.filter((point) => Date.now() - point.t < 500);
+  context.points.push[
+    {
+      d: Date.now(),
+      x: point.clientX,
+      y: point.clientY,
+    }
+  ];
   //console.log('move', point.clientX, point.clientY);
 };
 
 const end = (point, context) => {
   if (context.isTap) {
-    console.log('tap');
+    //console.log('tap');
     dispatch('tap', {});
     clearTimeout(context.pressTimeoutHandle);
   }
   if (context.isPan) {
-    console.log('panend');
+    //console.log('panend');
+    dispatch('panend', { point: { x: point.clientX, y: point.clientY } });
   }
   if (context.isPress) {
-    console.log('pressend');
+    //console.log('pressend');
+    dispatch('pressend', {});
   }
 
+  // 计算移动速度
+  context.points = context.points.filter((point) => Date.now() - point.t < 500);
+  let v;
+  if (!context.points.length) {
+    v = 0;
+  } else {
+    let d = Math.sqrt((point.clientX - context.points[0].x) ** 2 + (point.clientY - context.points[0].y) ** 2);
+    v = d / (Date.now() - context.points[0].t);
+  }
+  // 速度大于门限时发出 flick 事件
+  if (v > flickThreshold) {
+    //console.log('flick');
+    context.isFlick = true;
+    dispatch('flick', { point: { x: point.clientX, y: point.clientY } });
+  } else {
+    context.isFlick = false;
+  }
   //console.log('end', point.clientX, point.clientY);
 };
 
 const cancel = (point, context) => {
   clearTimeout(context.pressTimeoutHandle);
-  console.log('cancel', point.clientX, point.clientY);
+  console.debug('cancel', point.clientX, point.clientY);
 };
 
 /** 构造事件 */

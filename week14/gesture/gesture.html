@@ -2,7 +2,19 @@
   <script src="./gesture.js"></script>
   <script>
     document.documentElement.addEventListener('tap', (event) => {
-      console.log('on tap event', event)
+      console.log('on tap event')
+    });
+    document.documentElement.addEventListener('press', (event) => {
+      console.log('on press event', event.point)
+    });
+    document.documentElement.addEventListener('pressend', (event) => {
+      console.log('on press-end event')
+    });
+    document.documentElement.addEventListener('panend', (event) => {
+      console.log('on pan-end event', event.point)
+    });
+    document.documentElement.addEventListener('flick', (event) => {
+      console.log('on flick event', event.point)
     });
   </script>
 </body>
