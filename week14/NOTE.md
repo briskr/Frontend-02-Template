@@ -70,16 +70,28 @@ commit: dbd35e5
   obj.dispatchEvent(event);
   ```
 
-- [EventTarget.dispatchEvent()](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent)
+- [EventTarget.dispatchEvent()](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) - 向目标 element 派发事件
 
 commit: cc166ef
 
 ### 实现 flick 动作
 
 - end 时，计算最近一段时间的移动速度
-  - 每次 move 记录一个位置，且只保留最后 500ms 内的点
-  - end 时根据现存最早的点 和 当前位置 计算距离，除以两点相隔的时长得到速度
+  - 每次 move 记录一个位置坐标，且只保留最近 500ms 内的点
+  - end 时，计算现存最早的点 与 当前位置 之间的距离，除以两者发生时间的间隔，得到速度
   - end 前 .5s 内未发生移动的情况下，点数组为空，不计算速度
   - 若得到的速度大于预设的阈值，发出 flick 事件
 
 commit: 31145a6
+
+### 封装重构
+
+- 主体结构分析
+
+  - listen - 监听原生事件
+  - recognize - 识别用户动作
+  - dispatch - 派发自定义事件
+
+- 把各部分拆分重组成类，变量、函数移入适当的作用域
+
+- 完成自定义事件信息对象的内容和 dispatch 调用
