@@ -1,20 +1,26 @@
 <body oncontextmenu="event.preventDefault();">
-  <script src="./gesture.js"></script>
-  <script>
+  <script type="module">
+    import { enableGesture } from './gesture.js';
+
+    enableGesture(document.documentElement);
+
     document.documentElement.addEventListener('tap', (event) => {
       console.log('on tap event')
     });
     document.documentElement.addEventListener('press', (event) => {
-      console.log('on press event', event.point)
+      console.log('on press event')
     });
     document.documentElement.addEventListener('pressend', (event) => {
       console.log('on press-end event')
     });
+    document.documentElement.addEventListener('panstart', (event) => {
+      console.log('on pan-end event', 'isVertical==', event.isVertical)
+    });
     document.documentElement.addEventListener('panend', (event) => {
-      console.log('on pan-end event', event.point)
+      console.log('on pan-end event', 'isVertical==', event.isVertical)
     });
     document.documentElement.addEventListener('flick', (event) => {
-      console.log('on flick event', event.point)
+      console.log('on flick event', 'isVertical==', event.isVertical)
     });
   </script>
 </body>
