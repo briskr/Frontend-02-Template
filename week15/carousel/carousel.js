@@ -21,6 +21,9 @@ export class Carousel extends Component {
     }
     const children = this.root.children;
 
+    const timeline = new Timeline();
+    timeline.start();
+
     enableGesture(this.root);
 
     // 图片宽度
@@ -53,6 +56,50 @@ export class Carousel extends Component {
         children[pos].style.transform = `translateX(${(-pos + offset) * imgw}px)`;
       }
     });
+
+    setInterval(() => {
+      // nextIndex 的值可以表示平移后的位置应当向左偏移几个 100%, 按 1, 2, 3, 0, 1,... 循环变化
+      // 即平移动作的目标位置是 -nextIndex * 100%, 由此反推平移动作的起始位置是 (-nextIndex + 1) * 100%
+      if (position < 0) {
+        position = (position + children.length) % children.length;
+      }
+      const nextIndex = (position + 1) % children.length;
+
+      const currentElm = children[position];
+      const nextElm = children[nextIndex];
+
+      // 禁用 transition 滑动效果，先把下一帧图片放置到平移动作的起始位置
+      nextElm.style.transition = 'none';
+      nextElm.style.transform = `translateX(${(-nextIndex + 1) * imgw}px)`;
+
+      // 由此改用 Animation 进行滑动
+      timeline.add(
+        new Animation(
+          currentElm.style,
+          'transform',
+          -position * imgw,
+          (-position - 1) * imgw,
+          500,
+          0,
+          ease,
+          (v) => `translateX(${v}px)`
+        )
+      );
+      timeline.add(
+        new Animation(
+          nextElm.style,
+          'transform',
+          (-nextIndex + 1) * imgw,
+          -nextIndex * imgw,
+          500,
+          0,
+          ease,
+          (v) => `translateX(${v}px)`
+        )
+      );
+
+      position = nextIndex;
+    }, 3000);
 
     return this.root;
   }
