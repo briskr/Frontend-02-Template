@@ -46,15 +46,17 @@ export class Carousel extends Component {
       timeline.pause();
       clearInterval(slideIntervalHandle);
 
-      let dt = Date.now() - t;
-      let progress = dt / slideDuration;
+      const dt = Date.now() - t;
+      const progress = dt / slideDuration - Math.floor(dt / slideDuration);
       ax = (1 - ease(progress)) * imgw;
-      //console.debug('start, dt:', dt, 'progress:', progress, 'ax:', ax);
+      console.debug('start, dt:', dt, 'progress:', progress, 'ax:', ax);
     });
 
     this.root.addEventListener('pan', (event) => {
       let x = event.clientX - event.startX + ax;
       let current = position - (x - (x % imgw)) / imgw;
+      //console.debug('pan, clientX:', event.clientX, 'startX:', event.startX, 'x:', x, 'current:', current);
+
       // 找出主体图片及其前一帧、后一帧，让这 3 帧图片根据拖拽的当前位置移动到相应的坐标
       for (const offset of [-1, 0, 1]) {
         // pos: 本轮循环被移动的帧的下标
