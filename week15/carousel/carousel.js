@@ -29,7 +29,7 @@ export class Carousel extends Component {
     // 图片宽度
     const imgw = 571;
     // 一帧画面滑动动画的运行时长
-    const slideDuration = 1500;
+    const slideDuration = 500;
 
     // ## 响应 gesture 产生的事件 ##
 
@@ -67,8 +67,8 @@ export class Carousel extends Component {
       }
     });
 
-    this.root.addEventListener('panend', (event) => {
-      console.debug('panend');
+    this.root.addEventListener('end', (event) => {
+      console.debug('end');
       timeline.reset();
       timeline.start();
 
@@ -81,6 +81,26 @@ export class Carousel extends Component {
 
       // 计算滑动动画的结束位置: x 的绝对值大于 0.5w 则返回 1 或 -1，符号表示滑动方向
       let direction = Math.round((x % imgw) / imgw);
+
+      // 快扫时即使位移不过半也进入下一张
+      if (event.isFlick) {
+        console.debug('flick, v:', event.velocity);
+        // if (event.velocity > 0) {
+        //   console.debug('direction prev', direction);
+        //   direction = Math.ceil((x % imgw) / imgw);
+        //   console.debug('direction after', direction);
+        // } else if (event.velocity < 0) {
+        //   direction = Math.floor((x % imgw) / imgw);
+        // }
+        // ???
+        console.debug('direction prev', direction);
+        if (x > 0) {
+          direction = Math.ceil((x % imgw) / imgw);
+        } else if (x < 0) {
+          direction = Math.floor((x % imgw) / imgw);
+        }
+        console.debug('direction after', direction);
+      }
 
       // 选择需要滑动出、入视口的 3 帧图片，启动滑动动画
       for (const offset of [-1, 0, 1]) {
