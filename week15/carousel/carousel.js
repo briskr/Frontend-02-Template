@@ -55,7 +55,7 @@ export class Carousel extends Component {
     this.root.addEventListener('pan', (event) => {
       let x = event.clientX - event.startX + ax;
       let current = position - (x - (x % imgw)) / imgw;
-      //console.debug('pan, clientX:', event.clientX, 'startX:', event.startX, 'x:', x, 'current:', current);
+      console.debug('pan, clientX:', event.clientX, 'startX:', event.startX, 'x:', x, 'current:', current);
 
       // 找出主体图片及其前一帧、后一帧，让这 3 帧图片根据拖拽的当前位置移动到相应的坐标
       for (const offset of [-1, 0, 1]) {
@@ -68,8 +68,13 @@ export class Carousel extends Component {
     });
 
     this.root.addEventListener('panend', (event) => {
+      console.debug('panend');
       timeline.reset();
       timeline.start();
+
+      // 拖拽结束，重新启动周期性滑动动画
+      slideIntervalHandle = setInterval(slideIntoNext, 3000);
+
       let x = event.clientX - event.startX + ax;
       // 根据拖拽结束位置，选出视口露出内容超过一半的图片是哪一帧
       let current = position - (x - (x % imgw)) / imgw;
