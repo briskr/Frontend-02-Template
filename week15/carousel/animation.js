@@ -118,5 +118,6 @@ export class Animation {
 
     // 应用计算结果值, 和套用 template
     this.object[this.property] = this.template(v);
+    //console.debug('receiveTime', this.object, this.property);
   }
 }

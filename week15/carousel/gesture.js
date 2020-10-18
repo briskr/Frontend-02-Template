@@ -113,6 +113,12 @@ export class Recognizer {
 
   start(point, context) {
     (context.startX = point.clientX), (context.startY = point.clientY);
+
+    this.dispatcher.dispatch('start', {
+      clientX: point.clientX,
+      clientY: point.startY,
+    });
+
     context.points = [
       {
         t: Date.now(),
