@@ -2,7 +2,7 @@
 
 本周进入工具链部分
 
-##
+### Yeoman 基础
 
 脚手架 / generator - 自动生成项目的初始结构
 
@@ -33,3 +33,21 @@
   - 管理 npm 依赖
     - `this.fs.extendJSON()` 在目标目录下填充 json 文件
     - `this.npmInstall()` 执行安装(可带参数指定要安装的包，不带参数则按 package.json 执行)
+
+### 实例：应用 yeoman 创建 vue 项目
+
+见 generator-vue 目录下的代码。
+
+- 实际操作中遇到的问题记录
+  - 保留了 HtmlWebpackPlugin 来复制 html 文件并注入 bundle 过的脚本，相应配置了其使用 src/index.html 作为输入文件
+  - Webpack 当前最新版本为 5.x，遇到报错
+    - `Webpack 5: The 'compilation' argument must be an instance of Compilation`
+    - 简单查了一下，是 webpack v5 引入的变更引起某个地方不兼容
+    - 参考 https://github.com/jantimon/html-webpack-plugin/issues/1451
+    - 最后选择降级，调用 `this.npmInstall` 函数时改用 `webpack@4`
+  - 如果要使用 `/\.js$/` 应用 babel-loader 转译，相应增加安装 `@babel/core` 和 `@babel/preset-env`
+  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack-cli@3` (最新的 v4.x 报错，可能跟 webpack@4 不兼容) 和 `webpack-dev-server@3`
+  - 如果创建 Vue 实例采用 template 属性，而不是用 render 函数，浏览器能显示 index.html 内容，但是 App.vue 组件的内容没显示出来，控制台报错
+    - `You are using the runtime-only build of Vue`
+    - webpack 打包引入的 vue 库默认是未包含模板编译功能的精简版本
+    - 参照这篇文章增加了配置 `resolve` 进行 `vue` 引用版本的替换，不知道有没有更干净的办法 [vue.runtime.esm.js 改为含 template compiler 完整版](https://medium.com/@stefanledin/solve-the-you-are-using-the-runtime-only-build-of-vue-error-e675031f2c50)
