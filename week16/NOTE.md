@@ -46,8 +46,77 @@
     - 参考 https://github.com/jantimon/html-webpack-plugin/issues/1451
     - 最后选择降级，调用 `this.npmInstall` 函数时改用 `webpack@4`
   - 如果要使用 `/\.js$/` 应用 babel-loader 转译，相应增加安装 `@babel/core` 和 `@babel/preset-env`
-  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack-cli@3` (最新的 v4.x 报错，可能跟 webpack@4 不兼容) 和 `webpack-dev-server@3`
+  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack` 和 `webpack-dev-server@3`
   - 如果创建 Vue 实例采用 template 属性，而不是用 render 函数，浏览器能显示 index.html 内容，但是 App.vue 组件的内容没显示出来，控制台报错
     - `You are using the runtime-only build of Vue`
     - webpack 打包引入的 vue 库默认是未包含模板编译功能的精简版本
     - 参照这篇文章增加了配置 `resolve` 进行 `vue` 引用版本的替换，不知道有没有更干净的办法 [vue.runtime.esm.js 改为含 template compiler 完整版](https://medium.com/@stefanledin/solve-the-you-are-using-the-runtime-only-build-of-vue-error-e675031f2c50)
+
+### build 阶段工具介绍 - webpack
+
+- 设计思路
+  - 最初目的是把 Node 环境可用的代码打包生成浏览器环境可用的代码，未考虑 HTML 处理
+  - 实现逻辑是把所有 JS 打包之后，再向 HTML 中加入 JS 引用
+  - 多文件合并过程中，通过 loader 和 plugin 配合处理，进行文本转换等
+
+webpack-cli: 命令行外壳
+
+- 两种安装方式
+- 模式 1: 全局安装一份 webpack-cli
+  - 同时全局安装 webpack 和 webpack-cli 才能在 shell 中全局使用 `webpack` 命令
+- (推荐)模式 2: 不全局安装，项目内 --save-dev 安装 webpack-cli，然后 shell 中 `npx webpack` 执行
+
+- 基本配置
+
+  - 采用 js 模块形式
+  - entry
+    - 单入口 - 路径字符串
+    - 多入口 - 配置对象 { 名称 1: 路径 1, ...}
+    - 逐个入口进行，对每个文件的依赖树进行打包
+  - output
+    - path 输出路径
+    - filename 文件名
+
+- 对文件进行处理的主体: loader
+
+  - 工作内容 - 文本转换
+  - 配置形式 - 配置对象的 module 属性
+
+  ```javascript
+  module: {
+    rules: [{ test: /\.ext$/, use: '' }];
+  }
+  ```
+
+  - 根据文件后缀名选择 loader；一个后缀可以配置一系列 loader 依次处理
+
+  ```javascript
+  {
+    test: /\\.css$/,
+    use: [
+      { loader: 'style-loader' },
+      {
+        loader: 'css-loader',
+        options: {
+          modules: true
+        }
+      },
+      { loader: 'sass-loader' }
+    ]
+  }
+  ```
+
+- plugin 是独立工作，进行某种特定处理的单元 - 在 loaders 处理的流程之外起作用
+
+### build 阶段工具介绍 - babel
+
+负责把新版本 js 语法、库函数等转译成旧版本运行环境可接受的版本
+
+- 项目内安装
+  - `npm i -D @babel/core @babel/cli`
+  - 常规配置文件 .babelrc
+    - 简化使用: 预制配置集合 preset - 最常见的 preset-env
+  - babel 命令最简单的用法：单个参数:输入文件名，输出到 stdout
+  - 在 webpack.config.js 中配置 babel-loader 使用，处理项目中的所有 js 文件
+    - babel-loader 的 options 参数中，可以加载 presets 和 plugins
+    - 参见 week12 代码中的使用
