@@ -46,7 +46,7 @@
     - 参考 https://github.com/jantimon/html-webpack-plugin/issues/1451
     - 最后选择降级，调用 `this.npmInstall` 函数时改用 `webpack@4`
   - 如果要使用 `/\.js$/` 应用 babel-loader 转译，相应增加安装 `@babel/core` 和 `@babel/preset-env`
-  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack` 和 `webpack-dev-server@3`
+  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack-dev-server@3`
   - 如果创建 Vue 实例采用 template 属性，而不是用 render 函数，浏览器能显示 index.html 内容，但是 App.vue 组件的内容没显示出来，控制台报错
     - `You are using the runtime-only build of Vue`
     - webpack 打包引入的 vue 库默认是未包含模板编译功能的精简版本
