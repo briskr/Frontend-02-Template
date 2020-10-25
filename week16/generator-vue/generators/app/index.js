@@ -36,17 +36,19 @@ module.exports = class extends Generator {
     this.npmInstall(['vue'], { 'save-dev': false });
     this.npmInstall(
       [
-        'webpack@4',
+        'webpack',
+        'webpack-cli',
 
-        // 引入 webpack-dev-server
+        // 使用 webpack v4 时可启用 dev-server v3
+        //'webpack@4',
         //'webpack-cli@3',
-        //'webpack-dev-server@3'
+        //'webpack-dev-server@3',
 
         'vue-loader',
         'vue-template-compiler',
         'css-loader',
 
-        // 引入 ES6 语法转译需要这些
+        // 引入 ES6+ 语法转译需要这些
         //'babel-loader',
         //'@babel/core',
         //'@babel/preset-env',
@@ -66,5 +68,8 @@ module.exports = class extends Generator {
     this.fs.copyTpl(this.templatePath('main.js'), this.destinationPath('src/main.js'), {});
     this.fs.copyTpl(this.templatePath('App.vue'), this.destinationPath('src/App.vue'), {});
     this.fs.copyTpl(this.templatePath('webpack.config.js'), this.destinationPath('webpack.config.js'), {});
+    this.fs.copyTpl(this.templatePath('README.md'), this.destinationPath('README.md'), {
+      appname: this.appname,
+    });
   }
 };

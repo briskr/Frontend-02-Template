@@ -46,11 +46,14 @@
     - 参考 https://github.com/jantimon/html-webpack-plugin/issues/1451
     - 最后选择降级，调用 `this.npmInstall` 函数时改用 `webpack@4`
   - 如果要使用 `/\.js$/` 应用 babel-loader 转译，相应增加安装 `@babel/core` 和 `@babel/preset-env`
-  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack-dev-server@3`
+  - 如果要使用 webpack-dev-server 调试，相应引入 `webpack-dev-server`
   - 如果创建 Vue 实例采用 template 属性，而不是用 render 函数，浏览器能显示 index.html 内容，但是 App.vue 组件的内容没显示出来，控制台报错
     - `You are using the runtime-only build of Vue`
     - webpack 打包引入的 vue 库默认是未包含模板编译功能的精简版本
     - 参照这篇文章增加了配置 `resolve` 进行 `vue` 引用版本的替换，不知道有没有更干净的办法 [vue.runtime.esm.js 改为含 template compiler 完整版](https://medium.com/@stefanledin/solve-the-you-are-using-the-runtime-only-build-of-vue-error-e675031f2c50)
+  - 2020-10-25 webpack 去掉 @4，重新安装 webpack v5.2.0，并在项目中加入 webpack-cli(实际安装 v4.1.0)，用 `npx webpack` 进行打包，测试通过。
+    - 但是 webpack-dev-server 目前版本 v3.11.0 启动不了，报错说`Cannot find module 'webpack-cli/bin/config-yargs'`，推测是还不支持 webpack v5.x。
+    - 前面操作中 `Webpack 5: The 'compilation' ...` 错误，推测是因为运行的是全局安装的 webpack v4。今天测试前，已经随后续课程演示的操作卸载掉了全局安装的版本。
 
 ### build 阶段工具介绍 - webpack
 
