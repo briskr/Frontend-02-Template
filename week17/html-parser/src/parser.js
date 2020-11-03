@@ -92,7 +92,11 @@ function tagOpen(c) {
     };
     return tagName(c);
   } else {
-    return;
+    emit({
+      type: 'text',
+      content: c,
+    });
+    return data;
   }
 }
 
@@ -176,7 +180,8 @@ function afterAttributeName(c) {
   } else if (c === '/') {
     return selfClosingStartTag;
   } else if (c === '=') {
-    return beforeAttributeValue;
+    // never reaches
+    // return beforeAttributeValue;
   } else if (c === '>') {
     return data;
   } else if (c === EOF) {
@@ -224,14 +229,14 @@ function doubleQuotedAttributeValue(c) {
 }
 
 function afterQuotedAttributeValue(c) {
-  if (c.match(REGEXP_WHITE_SPACE)) {
+  if (c === EOF) {
+  } else if (c.match(REGEXP_WHITE_SPACE)) {
     return beforeAttributeName;
   } else if (c === '/') {
     return selfClosingStartTag;
   } else if (c === '>') {
     emit(currentToken);
     return data;
-  } else if (c === EOF) {
   } else {
     return beforeAttributeName(c);
   }
@@ -257,14 +262,31 @@ function unquotedAttributeValue(c) {
   }
 }
 
+function init() {
+  currentToken = null;
+  currentAttribute = null;
+  currentTextNode = null;
+  stack = [
+    {
+      type: 'document',
+      children: [],
+    },
+  ];
+}
+
 export function parseHTML(html) {
+  init();
+
   let state = data;
   for (let c of html) {
+    if (state == null) break;
     state = state(c);
   }
+  if (state == null) state = data;
   state = state(EOF);
 
   //console.log('-- result --');
   //console.log(JSON.stringify(stack[0]));
-  return stack[0];
+  const result = stack[0];
+  return result;
 }
