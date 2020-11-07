@@ -3,17 +3,15 @@ const fs = require('fs');
 
 http
   .createServer(function (req, res) {
-    console.log(req.headers);
-
+    console.log('content-length', req.headers['content-length']);
     const outFile = fs.createWriteStream('../server/public/index.html');
-
-    req.on('data', (chunk) => {
-      console.log(chunk.toString());
-      outFile.write(chunk);
-    });
+    req.pipe(outFile);
     req.on('end', () => {
+      console.log('request finished');
       outFile.end();
-      res.end('success');
     });
+
+    // 保留发送响应
+    res.end('success');
   })
   .listen(8082);
