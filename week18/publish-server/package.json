@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "publish": "scp -r ./* briskr@box:/home/briskr/publish-server/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

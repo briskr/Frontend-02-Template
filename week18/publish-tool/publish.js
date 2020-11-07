@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const request = http.request(
   {
-    hostname: '127.0.0.1',
+    hostname: 'box',
     port: 8082,
     method: 'POST',
     headers: {
@@ -18,7 +18,7 @@ const request = http.request(
   }
 );
 
-const file = fs.createReadStream('./package.json');
+const file = fs.createReadStream('./sample.html');
 file.on('data', (chunk) => {
   console.log('on data');
   console.log(chunk.toString());
