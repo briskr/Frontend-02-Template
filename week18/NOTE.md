@@ -53,11 +53,12 @@
 - 用户浏览器访问 `https://github.com/login/oauth/authorize?client_id=<Client ID>`
 - 用户登录确认后被重定向到 `http://localhost/auth?code=<code>` 应用服务器获取 code 值
 - 应用服务器以 code, client_id 和 client_secret 值，请求 `POST https://github.com/login/oauth/access_token` 获取 token
-- 凭 token 获取用户信息
+- 将 token 传回客户端；客户端实际发送 publish 请求时附带该 token 信息
+- 发布服务器凭 token 向 oAuth 提供方获取用户信息
   ```
   Authorization: token OAUTH-TOKEN
   GET https://api.github.com/user
   ```
-- 检查用户权限，通过后执行发布操作
+- 根据得到的用户信息检查权限，授权通过后执行发布操作
 
 详见代码 724096a9
