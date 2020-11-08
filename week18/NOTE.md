@@ -7,15 +7,14 @@
 - 课程中主要是把整个过程链路跑通
 - 创建 express 项目，去掉不用的 router 和模板引擎，在 server 上启动，作为前端发布的目标服务器
 
-### 发布系统
+### 创建发布系统
 
-- publish-tool
+- 系统结构
 
-  - 负责发送文件
-
-- publish-server
-
-  - 负责在服务器上接收文件，完成部署
+  - publish-tool
+    - 负责发送文件
+  - publish-server
+    - 负责在服务器上接收文件，完成部署
 
 - Node 里的 stream API
 
@@ -47,3 +46,18 @@
   - 流 API: `readable.pipe(writable)`
 
 具体实现详见代码 a4110f93
+
+### 添加 oauth 登录鉴权
+
+- 注册 Github App ，得到应用程序的 Client ID
+- 用户浏览器访问 `https://github.com/login/oauth/authorize?client_id=<Client ID>`
+- 用户登录确认后被重定向到 `http://localhost/auth?code=<code>` 应用服务器获取 code 值
+- 应用服务器以 code, client_id 和 client_secret 值，请求 `POST https://github.com/login/oauth/access_token` 获取 token
+- 凭 token 获取用户信息
+  ```
+  Authorization: token OAUTH-TOKEN
+  GET https://api.github.com/user
+  ```
+- 检查用户权限，通过后执行发布操作
+
+详见代码 724096a9
