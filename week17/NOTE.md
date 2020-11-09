@@ -34,5 +34,15 @@
 ### 单元测试应用实例
 
 - 引入第 4 周 html parser 代码，搭建 mocha + nyc 测试框架
+- 加入 launch.json 调试项，以 mocha 为入口测试
+- runtimeArgs 向 node 传递参数，args 向被运行的脚本传递参数
+- 分别在 `launch.json` 中、`.babelrc` 中启用 sourceMaps ，帮助调试断点定位转译前后的代码
+- 反复迭代添加测试用例、调试测试用例、修改代码 bug、验证覆盖率的循环，直到达到足够的函数覆盖率、代码行覆盖率等
 
-TODO 尚未完成
+作业目前完成到消除完红色问题行，尚有黄色问题行
+
+### 集成各项工具到 generator
+
+- 在 week16 的 generator-vue 基础上，增加 mocha, nyc 相关的依赖、scripts 和 配置文件
+
+具体代码见 generate-toytool 目录
