@@ -67,3 +67,5 @@ process.exit(1);
 - `chrome --headless`
 
 - [puppeteer](https://github.com/puppeteer/puppeteer#readme)
+
+详见 headless-demo 目录代码
