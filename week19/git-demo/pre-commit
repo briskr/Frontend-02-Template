@@ -1,13 +1,23 @@
 #!/usr/bin/env node
 const process = require('process');
+const child_process = require('child_process');
 const { ESLint } = require('eslint');
+
+function exec(cmd) {
+  return new Promise((resolve) => {
+    child_process.exec(cmd, resolve);
+  });
+}
 
 (async function main() {
   // 1. Create an instance with the `fix` option.
   const eslint = new ESLint();
 
+  await exec('git stash push -k');
+
   // 2. Lint files. This doesn't modify target files.
   const results = await eslint.lintFiles(['index.js']);
+  await exec('git stash pop');
 
   // 3. Modify the files with the fixed code.
   //await ESLint.outputFixes(results);
