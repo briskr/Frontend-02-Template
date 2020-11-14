@@ -1,6 +1,28 @@
 #!/usr/bin/env node
-
-// preventing commit
-console.log('hook aborting commit');
 const process = require('process');
-process.exit(1);
+const { ESLint } = require('eslint');
+
+(async function main() {
+  // 1. Create an instance with the `fix` option.
+  const eslint = new ESLint();
+
+  // 2. Lint files. This doesn't modify target files.
+  const results = await eslint.lintFiles(['index.js']);
+
+  // 3. Modify the files with the fixed code.
+  //await ESLint.outputFixes(results);
+
+  // 4. Format the results.
+  const formatter = await eslint.loadFormatter('stylish');
+  const resultText = formatter.format(results);
+
+  // 5. Output it.
+  console.log(resultText);
+
+  if (results.find((r) => r.errorCount > 0)) {
+    process.exitCode = 1;
+  }
+})().catch((error) => {
+  process.exitCode = 1;
+  console.error(error);
+});
