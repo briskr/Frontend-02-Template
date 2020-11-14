@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+// preventing commit
+console.log('hook aborting commit');
+const process = require('process');
+process.exit(1);
