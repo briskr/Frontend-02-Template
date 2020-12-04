@@ -37,7 +37,7 @@ export class Component {
     this[ATTRIBUTE][name] = value;
   }
   triggerEvent(type, args) {
-    this[ATTRIBUTE]['on' + type](new CustomEvent(type, { detail: args }));
+    this[ATTRIBUTE]['on' + type.replace(/^[\s\S]/, (s) => s.toUpperCase())](new CustomEvent(type, { detail: args }));
   }
 }
 

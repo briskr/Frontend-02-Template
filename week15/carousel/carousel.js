@@ -12,9 +12,9 @@ export class Carousel extends Component {
   render() {
     this.root = document.createElement('div');
     this.root.classList.add('carousel');
-    for (const url of this[ATTRIBUTE].src) {
+    for (const item of this[ATTRIBUTE].src) {
       const child = document.createElement('div');
-      child.style.backgroundImage = `url('${url}')`;
+      child.style.backgroundImage = `url('${item.img}')`;
       this.root.appendChild(child);
     }
     const children = this.root.children;
@@ -49,6 +49,13 @@ export class Carousel extends Component {
       const progress = dt / slideDuration - Math.floor(dt / slideDuration);
       ax = (1 - ease(progress)) * imgw;
       console.debug('start, dt:', dt, 'progress:', progress, 'ax:', ax);
+    });
+
+    this.root.addEventListener('tap', (event) => {
+      this.triggerEvent('click', {
+        position: this[STATE].position,
+        data: this[ATTRIBUTE].src[this[STATE].position],
+      });
     });
 
     this.root.addEventListener('pan', (event) => {
@@ -126,7 +133,7 @@ export class Carousel extends Component {
       this[STATE].position = this[STATE].position - (x - (x % imgw)) / imgw - direction;
       // 修正负值
       this[STATE].position = ((this[STATE].position % children.length) + children.length) % children.length;
-      this.triggerEvent('Change', { position: this[STATE].position });
+      this.triggerEvent('change', { position: this[STATE].position });
     });
 
     // ## 设置定时自动切换到下一帧图片 ##
@@ -173,7 +180,7 @@ export class Carousel extends Component {
       );
 
       this[STATE].position = nextIndex;
-      this.triggerEvent('Change', { position: this[STATE].position });
+      this.triggerEvent('change', { position: this[STATE].position });
     };
 
     // 启动定时执行，记录 handle 以便取消
