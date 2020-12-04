@@ -126,6 +126,7 @@ export class Carousel extends Component {
       this[STATE].position = this[STATE].position - (x - (x % imgw)) / imgw - direction;
       // 修正负值
       this[STATE].position = ((this[STATE].position % children.length) + children.length) % children.length;
+      this.triggerEvent('Change', { position: this[STATE].position });
     });
 
     // ## 设置定时自动切换到下一帧图片 ##
@@ -172,6 +173,7 @@ export class Carousel extends Component {
       );
 
       this[STATE].position = nextIndex;
+      this.triggerEvent('Change', { position: this[STATE].position });
     };
 
     // 启动定时执行，记录 handle 以便取消

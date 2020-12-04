@@ -8,5 +8,5 @@ let d = [
   'https://static001.geekbang.org/resource/image/73/e4/730ea9c393def7975deceb48b3eb6fe4.jpg',
 ];
 
-let a = <Carousel src={d}></Carousel>;
+let a = <Carousel src={d} onChange={(event) => console.debug('change:', event.detail.position)} />;
 a.mountTo(document.body);

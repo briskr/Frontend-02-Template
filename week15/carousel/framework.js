@@ -36,6 +36,9 @@ export class Component {
   setAttribute(name, value) {
     this[ATTRIBUTE][name] = value;
   }
+  triggerEvent(type, args) {
+    this[ATTRIBUTE]['on' + type](new CustomEvent(type, { detail: args }));
+  }
 }
 
 class ElementWrapper extends Component {
