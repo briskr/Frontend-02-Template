@@ -1,20 +1,18 @@
-import { Component } from './framework';
+import { Component, STATE, ATTRIBUTE } from './framework';
 import { enableGesture } from './gesture';
 import { ease } from './timing';
 import { Animation, Timeline } from './animation';
 
+export { STATE, ATTRIBUTE } from './framework';
+
 export class Carousel extends Component {
   constructor() {
     super();
-    this.attributes = Object.create(null);
-  }
-  setAttribute(name, value) {
-    this.attributes[name] = value;
   }
   render() {
     this.root = document.createElement('div');
     this.root.classList.add('carousel');
-    for (const url of this.attributes.src) {
+    for (const url of this[ATTRIBUTE].src) {
       const child = document.createElement('div');
       child.style.backgroundImage = `url('${url}')`;
       this.root.appendChild(child);
@@ -34,7 +32,8 @@ export class Carousel extends Component {
     // ## 响应 gesture 产生的事件 ##
 
     // 当前视口显示的图片的下标
-    let position = 0;
+    this[STATE].position = 0;
+
     // 动画运行起始时刻
     let t = 0;
     // 动画运行带来的位移
@@ -54,7 +53,7 @@ export class Carousel extends Component {
 
     this.root.addEventListener('pan', (event) => {
       let x = event.clientX - event.startX + ax;
-      let current = position - (x - (x % imgw)) / imgw;
+      let current = this[STATE].position - (x - (x % imgw)) / imgw;
       console.debug('pan, clientX:', event.clientX, 'startX:', event.startX, 'x:', x, 'current:', current);
 
       // 找出主体图片及其前一帧、后一帧，让这 3 帧图片根据拖拽的当前位置移动到相应的坐标
@@ -77,7 +76,7 @@ export class Carousel extends Component {
 
       let x = event.clientX - event.startX + ax;
       // 根据拖拽结束位置，选出视口露出内容超过一半的图片是哪一帧
-      let current = position - (x - (x % imgw)) / imgw;
+      let current = this[STATE].position - (x - (x % imgw)) / imgw;
 
       // 计算滑动动画的结束位置: x 的绝对值大于 0.5w 则返回 1 或 -1，符号表示滑动方向
       let direction = Math.round((x % imgw) / imgw);
@@ -124,9 +123,9 @@ export class Carousel extends Component {
       }
 
       // 动画完成后的当前帧
-      position = position - (x - (x % imgw)) / imgw - direction;
+      this[STATE].position = this[STATE].position - (x - (x % imgw)) / imgw - direction;
       // 修正负值
-      position = ((position % children.length) + children.length) % children.length;
+      this[STATE].position = ((this[STATE].position % children.length) + children.length) % children.length;
     });
 
     // ## 设置定时自动切换到下一帧图片 ##
@@ -135,12 +134,12 @@ export class Carousel extends Component {
     const slideIntoNext = () => {
       // nextIndex 的值可以表示平移后的位置应当向左偏移几个 100%, 按 1, 2, 3, 0, 1,... 循环变化
       // 即平移动作的目标位置是 -nextIndex * 100%, 由此反推平移动作的起始位置是 (-nextIndex + 1) * 100%
-      if (position < 0) {
-        position = (position + children.length) % children.length;
+      if (this[STATE].position < 0) {
+        this[STATE].position = (this[STATE].position + children.length) % children.length;
       }
-      const nextIndex = (position + 1) % children.length;
+      const nextIndex = (this[STATE].position + 1) % children.length;
 
-      const currentElm = children[position];
+      const currentElm = children[this[STATE].position];
       const nextElm = children[nextIndex];
 
       // 记录本次开始滑动动画的时间
@@ -151,8 +150,8 @@ export class Carousel extends Component {
         new Animation(
           currentElm.style,
           'transform',
-          -position * imgw,
-          (-position - 1) * imgw,
+          -this[STATE].position * imgw,
+          (-this[STATE].position - 1) * imgw,
           slideDuration,
           0,
           ease,
@@ -172,15 +171,12 @@ export class Carousel extends Component {
         )
       );
 
-      position = nextIndex;
+      this[STATE].position = nextIndex;
     };
 
     // 启动定时执行，记录 handle 以便取消
     slideIntervalHandle = setInterval(slideIntoNext, 3000);
 
     return this.root;
-  }
-  mountTo(parent) {
-    parent.appendChild(this.render());
   }
 }

@@ -18,16 +18,23 @@ export function createElement(type, attrs, ...children) {
   return elem;
 }
 
+export const STATE = Symbol('state');
+export const ATTRIBUTE = Symbol('attribute');
+
 export class Component {
-  constructor() {}
+  constructor() {
+    this[ATTRIBUTE] = Object.create(null);
+    this[STATE] = Object.create(null);
+  }
   mountTo(parent) {
+    if (!this.root) this.render();
     parent.appendChild(this.root);
   }
   appendChild(child) {
     child.mountTo(this.root);
   }
   setAttribute(name, value) {
-    this.root.setAttribute(name, value);
+    this[ATTRIBUTE][name] = value;
   }
 }
 
